@@ -1,0 +1,6 @@
+{
+  "name": "Contracts",
+  "description": "Create, send, electronically sign, and securely archive contracts with Firebase persistence, client signing links, user authentication, and PDF generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

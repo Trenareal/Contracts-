@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "users": {
+      "title": "users",
+      "description": "User profile and business settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "occupation": { "type": "object" },
+        "businessProfile": { "type": "object" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "contracts": {
+      "title": "contracts",
+      "description": "Electronic contracts and signing records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminUid": { "type": "string" },
+        "signingToken": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "termsAndConditions": { "type": "string" },
+        "totalCost": { "type": "number" },
+        "depositAmount": { "type": "number" },
+        "currency": { "type": "string" },
+        "language": { "type": "string" },
+        "occupation": { "type": "string" },
+        "deliveryDate": { "type": "string" },
+        "hasMaterialsTable": { "type": "boolean" },
+        "materialsList": { "type": "array" },
+        "images": { "type": "array" },
+        "adminParty": { "type": "object" },
+        "clientParty": { "type": "object" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "completedAt": { "type": "string" },
+        "linkInvalidated": { "type": "boolean" },
+        "accessCount": { "type": "number" },
+        "auditTrail": { "type": "array" }
+      },
+      "required": ["id", "signingToken", "title", "totalCost", "currency", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/users" },
+      "description": "User profiles and preferences"
+    },
+    "/contracts/{contractId}": {
+      "schema": { "$ref": "#/entities/contracts" },
+      "description": "Contracts and signing agreements"
+    }
+  }
+}
+
