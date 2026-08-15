@@ -6,7 +6,7 @@ import {
   GoogleAuthProvider,
   updateProfile
 } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, signInWithGoogle } from '../lib/firebase';
 import { 
   hashPassword, 
   saveAccountCredentialsToFirestore, 
@@ -166,35 +166,48 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Popup Google Sign In with prompt='select_account'
-  const handleDirectGooglePopup = async () => {
+  // Direct Firebase Google Sign-In with popup
+  const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
     try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
-      });
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithGoogle();
       const user = result.user;
+
+      console.log("Google account:", user.email);
+      console.log("User ID:", user.uid);
+
       const authUser: AuthUser = {
         uid: user.uid,
-        displayName: user.displayName || user.email?.split('@')[0] || 'User',
+        displayName: user.displayName || user.email?.split('@')[0] || 'Google User',
         email: user.email,
       };
+
       if (user.email) {
         saveDeviceAccount({
           email: user.email,
           name: user.displayName || user.email.split('@')[0],
         });
       }
+
       localStorage.setItem('contract_app_user', JSON.stringify(authUser));
-      if (onAuthSuccess) onAuthSuccess(authUser);
-      if (onClose) onClose();
-    } catch (err: any) {
-      console.warn('Google popup notice:', err?.code, err?.message);
-      // When popup is closed, blocked by iframe sandbox, or domain needs selection:
-      // Open the Google "Choose an account" screen so user can select their account effortlessly
+
+      if (onAuthSuccess) {
+        onAuthSuccess(authUser);
+      }
+      if (onClose) {
+        onClose();
+      }
+    } catch (error: any) {
+      const code = error?.code || '';
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // User closed or cancelled the popup - gracefully reset loading state without error log
+        console.log('Google Sign-In popup closed by user.');
+        return;
+      }
+
+      console.warn('Google sign-in notice:', error?.message || error);
+      // Fallback: If popup is blocked by browser sandbox or domain restriction, open account selection screen
       const accounts = getDeviceAccounts();
       setDeviceAccounts(accounts);
       if (accounts.length > 0) {
@@ -207,6 +220,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setLoading(false);
     }
   };
+
+  const handleDirectGooglePopup = handleGoogleSignIn;
 
   // Email/Password submit with database password matching and verification
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -744,7 +759,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {/* Primary Google Auth Button */}
               <button
                 type="button"
-                onClick={handleDirectGooglePopup}
+                onClick={handleGoogleSignIn}
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-2xl text-xs font-sans font-bold text-slate-800 transition-all shadow-xs cursor-pointer disabled:opacity-50 active:scale-98"
               >
