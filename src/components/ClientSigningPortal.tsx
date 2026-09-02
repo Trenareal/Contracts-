@@ -107,20 +107,20 @@ export const ClientSigningPortal: React.FC<ClientSigningPortalProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-4 sm:py-8 px-3 sm:px-6 lg:px-8 pb-24 md:pb-12">
+    <div className="min-h-screen bg-slate-50 text-slate-900 py-2 sm:py-4 px-2 sm:px-4 pb-16 md:pb-10">
       
       {/* Top Floating Security Header */}
-      <div className="max-w-4xl mx-auto mb-4 sm:mb-8 flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 p-3.5 sm:p-5 shadow-xs rounded-2xl">
+      <div className="max-w-4xl mx-auto mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-3 bg-white border-2 border-slate-200 p-3 sm:p-4 shadow-xs rounded-2xl">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-slate-900 text-blue-400 flex items-center justify-center font-bold text-sm border border-slate-800">
             C
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-sans font-bold tracking-[0.15em] uppercase text-slate-600">
+              <span className="text-[10px] font-sans font-bold tracking-[0.15em] uppercase text-slate-800">
                 {i18n.contractPortalTitle || 'Client Signing Portal'}
               </span>
-              <span className="px-2 py-0.5 text-[9px] font-mono border border-slate-200 bg-slate-50 rounded-md text-slate-600">
+              <span className="px-2 py-0.5 text-[9px] font-mono border border-slate-300 bg-slate-100 rounded-md text-slate-700 font-bold">
                 Ref: {contract.id}
               </span>
             </div>
@@ -130,18 +130,30 @@ export const ClientSigningPortal: React.FC<ClientSigningPortalProps> = ({
           </div>
         </div>
 
-        {onBackToAdmin && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={onBackToAdmin}
-            className="text-[10px] font-sans font-bold uppercase tracking-widest text-slate-700 hover:text-slate-900 border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-1.5 cursor-pointer transition-all rounded-xl active:scale-95"
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPdf}
+            className="flex items-center gap-1.5 text-[10px] font-sans font-bold uppercase tracking-wider text-slate-700 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 px-3 py-1.5 cursor-pointer transition-all rounded-xl active:scale-95 disabled:opacity-50"
+            title="Download PDF Document"
           >
-            ← Admin View
+            <Download className="w-3.5 h-3.5 text-blue-600" />
+            <span>{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
           </button>
-        )}
+
+          {onBackToAdmin && (
+            <button
+              onClick={onBackToAdmin}
+              className="text-[10px] font-sans font-bold uppercase tracking-widest text-slate-700 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 px-3 py-1.5 cursor-pointer transition-all rounded-xl active:scale-95"
+            >
+              ← Admin View
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Contract Container */}
-      <div className="max-w-4xl mx-auto bg-white text-slate-900 border border-slate-200 shadow-sm overflow-hidden rounded-3xl">
+      <div className="max-w-4xl mx-auto bg-white text-slate-900 border-2 border-slate-200 shadow-sm overflow-hidden rounded-2xl">
         
         {/* Banner if already completed or invalidated */}
         {isCompleted && (
@@ -398,12 +410,18 @@ export const ClientSigningPortal: React.FC<ClientSigningPortalProps> = ({
 
             {/* Signature Pad */}
             <div>
-              <label className="block text-[10px] sm:text-[11px] font-sans uppercase tracking-wider text-slate-700 mb-1.5 font-bold">
-                {i18n.digitalSignature || 'Digital Signature Capture'} *
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[10px] sm:text-[11px] font-sans uppercase tracking-wider text-slate-700 font-bold">
+                  {i18n.digitalSignature || 'Digital Signature Capture'} *
+                </label>
+                <span className="text-[10px] text-blue-600 font-medium">
+                  Choose Draw or Type Name below
+                </span>
+              </div>
               <SignaturePad
                 onSaveSignature={(sig) => setSignatureDataUrl(sig)}
                 savedSignature={signatureDataUrl}
+                defaultName={clientName}
               />
             </div>
 

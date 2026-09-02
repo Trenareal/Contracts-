@@ -222,24 +222,33 @@ export async function generateContractPDF(contract: Contract, elementToCapture?:
           const xPos = margin + c * (imgWidth + 16);
 
           try {
-            // Draw thumbnail image container
-            pdf.setDrawColor(226, 232, 240);
-            pdf.rect(xPos, y, imgWidth, imgHeight);
+            // Determine image format (JPEG/PNG) or let jsPDF auto-detect
+            let format = 'JPEG';
+            if (img.url.startsWith('data:image/png')) {
+              format = 'PNG';
+            } else if (img.url.startsWith('data:image/webp')) {
+              format = 'WEBP';
+            }
 
-            // Add image
-            pdf.addImage(img.url, 'JPEG', xPos + 1, y + 1, imgWidth - 2, imgHeight - 2);
+            // Draw thumbnail image container
+            pdf.setDrawColor(203, 213, 225);
+            pdf.setFillColor(248, 250, 252);
+            pdf.roundedRect(xPos, y, imgWidth, imgHeight, 3, 3, 'FD');
+
+            // Add image cleanly inside box
+            pdf.addImage(img.url, format, xPos + 1.5, y + 1.5, imgWidth - 3, imgHeight - 3);
 
             // Caption & Label
-            pdf.setFontSize(7.5);
+            pdf.setFontSize(8);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(30, 41, 59);
-            const captionText = `#${imgIndex + 1}: ${img.caption || 'Attachment Photo'}`;
-            pdf.text(captionText.slice(0, 35), xPos, y + imgHeight + 12);
+            const captionText = `Photo #${imgIndex + 1}: ${img.caption || 'Attached Specification'}`;
+            pdf.text(captionText.slice(0, 38), xPos + 2, y + imgHeight + 11);
           } catch (imgErr) {
             console.warn('Failed to embed image in PDF:', imgErr);
             pdf.setFontSize(7.5);
             pdf.setTextColor(148, 163, 184);
-            pdf.text(`Photo #${imgIndex + 1} (${img.caption || 'Attached'})`, xPos, y + 20);
+            pdf.text(`Photo #${imgIndex + 1}: ${img.caption || 'Attached Specification'}`, xPos + 2, y + imgHeight / 2);
           }
         }
       }

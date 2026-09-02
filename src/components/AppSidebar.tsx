@@ -276,33 +276,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Bottom Footer Actions */}
         <div className="p-4 border-t border-slate-800 space-y-2 bg-slate-950/60">
-          {currentUser && onSignOut ? (
-            <button
-              onClick={() => {
-                onClose();
-                onSignOut();
-              }}
-              className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 text-xs font-sans font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenAuthModal) onOpenAuthModal();
-              }}
-              className="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-sans font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </button>
-          )}
+          <button
+            onClick={() => {
+              onClose();
+              if (onOpenOccupationModal) onOpenOccupationModal();
+            }}
+            className="w-full py-2.5 px-3 rounded-xl bg-blue-600/15 hover:bg-blue-600/25 text-blue-300 border border-blue-500/20 text-xs font-sans font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98"
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Edit Profile & Trade</span>
+          </button>
 
           <div className="text-center pt-1">
             <span className="text-[10px] text-slate-500 font-mono">
-              Electronic Signature Cloud • v2.6
+              Electronic Signature Cloud • Active
             </span>
           </div>
         </div>

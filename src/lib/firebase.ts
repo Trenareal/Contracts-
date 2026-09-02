@@ -3,7 +3,14 @@ import { getFirestore } from 'firebase/firestore';
 import {
   getAuth,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
 } from 'firebase/auth';
 import config from '../../firebase-applet-config.json';
 
@@ -23,11 +30,34 @@ export const db = config.firestoreDatabaseId
   : getFirestore(app);
 
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
 
-export const signInWithGoogle = () => {
-  return signInWithPopup(auth, googleProvider);
+// --- Google ---
+export const googleProvider = new GoogleAuthProvider();
+export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+
+// --- Apple ---
+export const appleProvider = new OAuthProvider('apple.com');
+appleProvider.addScope('email');
+appleProvider.addScope('name');
+export const signInWithApple = () => signInWithPopup(auth, appleProvider);
+
+// --- Email sign-up / sign-in ---
+export const signUpWithEmail = async (email: string, password: string) => {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try {
+    await sendEmailVerification(cred.user);
+  } catch (err) {
+    console.warn('Verification email notice:', err);
+  }
+  return cred;
 };
 
-export default app;
+export const signInWithEmail = (email: string, password: string) =>
+  signInWithEmailAndPassword(auth, email, password);
 
+export const signOutUser = () => signOut(auth);
+
+export const watchAuthState = (callback: (user: FirebaseUser | null) => void) =>
+  onAuthStateChanged(auth, callback);
+
+export default app;

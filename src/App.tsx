@@ -1,172 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Contract, CreateContractPayload, AuthUser } from './types';
-import { AdminDashboard } from './components/AdminDashboard';
 import { ClientSigningPortal } from './components/ClientSigningPortal';
-import { NavigationBar } from './components/NavigationBar';
-import { AppSidebar } from './components/AppSidebar';
-import { OccupationsLibrary } from './components/OccupationsLibrary';
-import { CurrencyManager } from './components/CurrencyManager';
-import { LanguageManager } from './components/LanguageManager';
 import { ContractForm } from './components/ContractForm';
-import { AuthModal } from './components/AuthModal';
-import { OccupationSelectModal, UserBusinessProfile } from './components/OccupationSelectModal';
-import { OccupationDefinition, OCCUPATIONS_DATABASE } from './data/occupations';
-import { detectDefaultLanguage } from './utils/i18n';
-import { auth } from './lib/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { ContractReadyView } from './components/ContractReadyView';
+import { BlankStarterPage } from './components/BlankStarterPage';
+import { detectDefaultLanguage, SUPPORTED_LANGUAGES } from './utils/i18n';
+import { CURRENCY_LIST } from './utils/formatters';
 import { 
-  subscribeContracts, 
   createContractInFirebase, 
-  updateContractInFirebase,
-  completeContractInFirebase,
-  invalidateContractLinkInFirebase, 
-  deleteContractFromFirebase, 
   getContractByIdOrToken,
-  getUserProfileFromFirestore,
-  saveUserProfileToFirestore
 } from './lib/firebaseService';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, ArrowLeft, Globe, DollarSign } from 'lucide-react';
+
+const DEFAULT_USER: AuthUser = {
+  uid: 'workspace_user',
+  displayName: 'Contract Drafter',
+  email: 'admin@contracts.local',
+};
 
 export default function App() {
-  const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  // Left Sidebar drawer state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Occupation & Business Profile state
-  const [userOccupation, setUserOccupation] = useState<OccupationDefinition | null>(null);
-  const [userBusinessProfile, setUserBusinessProfile] = useState<UserBusinessProfile | null>(null);
-  const [showOccupationModal, setShowOccupationModal] = useState(false);
-  
-  // Navigation Bar Active Tab
-  const [navTab, setNavTab] = useState<'contracts' | 'occupations' | 'currency' | 'language'>('contracts');
+  const [activeClientContract, setActiveClientContract] = useState<Contract | null>(null);
+  const [justCreatedContract, setJustCreatedContract] = useState<Contract | null>(null);
+  const [isDrafting, setIsDrafting] = useState(false);
 
   // Global Currency & Language Preferences
   const [selectedCurrency, setSelectedCurrency] = useState<string>('NGN');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
-  // Modal / Drafter state
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [presetOccupation, setPresetOccupation] = useState<OccupationDefinition | null>(null);
-
-  // Active Client Portal route state
-  const [activeClientContract, setActiveClientContract] = useState<Contract | null>(null);
-
-  // Auto detect initial language & location
+  // Auto detect initial language
   useEffect(() => {
     setSelectedLanguage(detectDefaultLanguage());
   }, []);
 
-  // Subscribe to auth state & load user occupation and business profile
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const u: AuthUser = { 
-          uid: user.uid,
-          displayName: user.displayName || user.email?.split('@')[0], 
-          email: user.email 
-        };
-        setCurrentUser(u);
-        localStorage.setItem('contract_app_user', JSON.stringify(u));
-
-        // Load profile from Firestore or local fallback
-        try {
-          const profile = await getUserProfileFromFirestore(user.uid);
-          if (profile?.occupation && profile?.businessProfile) {
-            setUserOccupation(profile.occupation);
-            setUserBusinessProfile(profile.businessProfile);
-          } else {
-            checkUserProfile(u.uid, u.email);
-          }
-        } catch {
-          checkUserProfile(u.uid, u.email);
-        }
-      } else {
-        const savedUser = localStorage.getItem('contract_app_user');
-        if (savedUser) {
-          try {
-            const parsed = JSON.parse(savedUser);
-            setCurrentUser(parsed);
-            checkUserProfile(parsed.uid, parsed.email);
-          } catch {
-            setCurrentUser(null);
-          }
-        } else {
-          setCurrentUser(null);
-          setUserOccupation(null);
-          setUserBusinessProfile(null);
-        }
-      }
-    });
-    return () => unsubscribeAuth();
-  }, []);
-
-  const checkUserProfile = (uid?: string, email?: string | null) => {
-    const keyId = uid || email || '';
-    if (!keyId) return;
-    const occKey = `contract_app_occ_${keyId}`;
-    const bizKey = `contract_app_business_${keyId}`;
-    const savedOcc = localStorage.getItem(occKey);
-    const savedBiz = localStorage.getItem(bizKey);
-
-    let parsedOcc: OccupationDefinition | null = null;
-    let parsedBiz: UserBusinessProfile | null = null;
-
-    if (savedOcc) {
-      try {
-        parsedOcc = JSON.parse(savedOcc);
-        setUserOccupation(parsedOcc);
-      } catch {
-        setUserOccupation(null);
-      }
-    }
-
-    if (savedBiz) {
-      try {
-        parsedBiz = JSON.parse(savedBiz);
-        setUserBusinessProfile(parsedBiz);
-      } catch {
-        setUserBusinessProfile(null);
-      }
-    }
-
-    // If either occupation or business profile is not set, prompt onboarding setup
-    if (!parsedOcc || !parsedBiz?.businessName) {
-      setShowOccupationModal(true);
-    }
-  };
-
-  const handleSelectOccupation = async (occ: OccupationDefinition, businessProfile?: UserBusinessProfile) => {
-    setUserOccupation(occ);
-    if (businessProfile) {
-      setUserBusinessProfile(businessProfile);
-    }
-    if (currentUser?.uid || currentUser?.email) {
-      const keyId = currentUser.uid || currentUser.email || '';
-      localStorage.setItem(`contract_app_occ_${keyId}`, JSON.stringify(occ));
-      if (businessProfile) {
-        localStorage.setItem(`contract_app_business_${keyId}`, JSON.stringify(businessProfile));
-      }
-      if (currentUser.uid) {
-        try {
-          await saveUserProfileToFirestore(currentUser.uid, {
-            email: currentUser.email || '',
-            displayName: currentUser.displayName || '',
-            occupation: occ,
-            businessProfile: businessProfile,
-          });
-        } catch (err) {
-          console.warn('Failed to sync profile to Firestore:', err);
-        }
-      }
-    }
-    setShowOccupationModal(false);
-  };
-
-  // Real-time Firestore sync & initial route check
+  // Check URL params for client signing route (?token=... or ?contract=...)
   useEffect(() => {
     const checkTokenRoute = async () => {
       try {
@@ -179,314 +46,182 @@ export default function App() {
           }
         }
       } catch (err) {
-        console.error('Error checking token route:', err);
+        console.error('Error checking contract token:', err);
       } finally {
         setLoading(false);
       }
     };
 
     checkTokenRoute();
-
-    if (!currentUser?.uid) {
-      setContracts([]);
-      setLoading(false);
-      return;
-    }
-
-    const unsubscribe = subscribeContracts(currentUser.uid, (updatedContracts) => {
-      setContracts(updatedContracts);
-      
-      if (activeClientContract) {
-        const fresh = updatedContracts.find(c => c.id === activeClientContract.id || c.signingToken === activeClientContract.signingToken);
-        if (fresh) {
-          setActiveClientContract(fresh);
-        }
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [currentUser?.uid]);
-
-  // Scoped user contracts for current user (starts at 0 for new account)
-  const userContracts = contracts.filter((c) => {
-    if (!currentUser) return false;
-    
-    // Strict UID matching
-    if (currentUser.uid && c.adminUid && c.adminUid === currentUser.uid) {
-      return true;
-    }
-
-    // Email match fallback for legacy data
-    const currentEmail = currentUser.email?.toLowerCase();
-    if (currentEmail) {
-      if (c.adminParty?.email && c.adminParty.email.toLowerCase() === currentEmail) {
-        return true;
-      }
-      if (c.clientParty?.email && c.clientParty.email.toLowerCase() === currentEmail) {
-        return true;
-      }
-    }
-
-    return false;
-  });
+  }, []);
 
   const handleCreateContract = async (payload: CreateContractPayload) => {
     try {
-      // Pre-fill user admin details if present
       const fullPayload: CreateContractPayload = {
         ...payload,
-        adminUid: currentUser?.uid,
-        adminParty: {
-          ...payload.adminParty,
-          email: currentUser?.email || payload.adminParty.email,
-          name: currentUser?.displayName || payload.adminParty.name,
-          company: payload.adminParty.company || userBusinessProfile?.businessName || 'Apex Craft & Engineering Works',
-          title: payload.adminParty.title || userBusinessProfile?.professionalTitle || 'Lead Artisan / Director',
-          phone: payload.adminParty.phone || userBusinessProfile?.phone || '',
-          address: payload.adminParty.address || userBusinessProfile?.address || '',
-        }
+        currency: payload.currency || selectedCurrency,
+        language: payload.language || selectedLanguage,
       };
-      await createContractInFirebase(fullPayload, currentUser?.uid);
-      setShowCreateModal(false);
-      setPresetOccupation(null);
-      setNavTab('contracts');
-    } catch (err) {
-      console.error('Failed to create contract in Firebase:', err);
-      alert('Failed to save contract to Firebase. Please check connection.');
-    }
-  };
 
-  const handleUpdateContract = async (contractId: string, payload: CreateContractPayload) => {
-    try {
-      await updateContractInFirebase(contractId, payload);
-      setShowCreateModal(false);
+      const created = await createContractInFirebase(fullPayload, DEFAULT_USER.uid);
+      setJustCreatedContract(created);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      console.error('Failed to update contract in Firebase:', err);
-      alert(err?.message || 'Failed to update contract in Firebase.');
+      console.error('Failed to create contract:', err);
+      alert(err?.message || 'Failed to create contract. Please check your internet connection.');
     }
   };
 
-  const handleInvalidateLink = async (contractId: string) => {
-    try {
-      await invalidateContractLinkInFirebase(contractId);
-    } catch (err) {
-      console.error('Failed to invalidate link in Firebase:', err);
-    }
-  };
-
-  const handleCompleteContract = async (contractId: string) => {
-    try {
-      await completeContractInFirebase(contractId);
-    } catch (err: any) {
-      console.error('Failed to complete contract in Firebase:', err);
-      alert(err?.message || 'Failed to complete contract.');
-    }
-  };
-
-  const handleDeleteContract = async (contractId: string) => {
-    if (!confirm('Are you sure you want to delete this contract?')) return;
-    try {
-      await deleteContractFromFirebase(contractId);
-    } catch (err) {
-      console.error('Failed to delete contract from Firebase:', err);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      localStorage.removeItem('contract_app_user');
-      await signOut(auth);
-    } catch (err) {
-      console.error('Sign out error:', err);
-    } finally {
-      setCurrentUser(null);
-      setUserOccupation(null);
-      setUserBusinessProfile(null);
-      setContracts([]);
-    }
-  };
-
-  const handleLaunchOccupationDraft = (occ: OccupationDefinition) => {
-    setPresetOccupation(occ);
-    setShowCreateModal(true);
+  const handleDraftNew = () => {
+    setJustCreatedContract(null);
+    setActiveClientContract(null);
+    setIsDrafting(false);
+    window.history.pushState({}, '', window.location.pathname);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white gap-4">
-        <span className="font-sans font-extrabold tracking-tight text-3xl">
+        <span className="font-extrabold tracking-tight text-3xl">
           CONTRACT<span className="font-light italic text-blue-400">S</span>
         </span>
         <div className="flex items-center gap-2">
           <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
-          <p className="text-xs font-sans font-bold uppercase tracking-wider text-slate-400">
-            Loading Workspace & Cloud Database...
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Loading Contract Suite...
           </p>
         </div>
       </div>
     );
   }
 
-  // Client Portal Mode (Client Sign Only via direct link)
+  // 1. Client Signing Portal View (Triggered by visiting a contract link or clicking preview)
   if (activeClientContract) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isDirectLink = !!(urlParams.get('token') || urlParams.get('contract'));
-    const isContractOwner = currentUser && (
-      (currentUser.uid && activeClientContract.adminUid === currentUser.uid) ||
-      (currentUser.email?.toLowerCase() === activeClientContract.adminParty?.email?.toLowerCase())
-    );
-
     return (
-      <ClientSigningPortal
-        contract={activeClientContract}
-        onSigned={(updated) => setActiveClientContract(updated)}
-        onBackToAdmin={
-          (!isDirectLink || isContractOwner)
-            ? () => {
-                setActiveClientContract(null);
-                window.history.pushState({}, '', window.location.pathname);
-              }
-            : undefined
-        }
-      />
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+        <ClientSigningPortal
+          contract={activeClientContract}
+          onSigned={(updated) => setActiveClientContract(updated)}
+          onBackToAdmin={handleDraftNew}
+        />
+      </div>
     );
   }
 
-  // Mandatory Authentication Gate: Must sign up or sign in to use the application
-  if (!currentUser) {
-    return (
-      <AuthModal 
-        isOpen={true} 
-        isMandatory={true} 
-        onAuthSuccess={(user) => setCurrentUser(user)} 
-      />
-    );
-  }
-
-  // Admin Application Shell with Persistent Menu Bar & Left Drawer
+  // 2. Main Flow: Blank Starter Page -> Contract Drafter -> Share Hub
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       
-      {/* Collapsible Left Sidebar with all Extras */}
-      <AppSidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        activeTab={navTab}
-        setActiveTab={setNavTab}
-        onOpenCreateModal={() => {
-          setPresetOccupation(null);
-          setShowCreateModal(true);
-        }}
-        currentUser={currentUser}
-        userOccupation={userOccupation}
-        userBusinessProfile={userBusinessProfile}
-        onOpenOccupationModal={() => setShowOccupationModal(true)}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
-        onSignOut={handleSignOut}
-        selectedCurrency={selectedCurrency}
-        onCurrencyChange={setSelectedCurrency}
-        selectedLanguage={selectedLanguage}
-        onLanguageChange={setSelectedLanguage}
-        contractsCount={userContracts.length}
-      />
+      {/* Top Header Bar */}
+      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-13 sm:h-15 flex items-center justify-between gap-2 sm:gap-3">
+          
+          {/* Logo & Identity */}
+          <div 
+            onClick={handleDraftNew}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
+          >
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md shadow-blue-500/30 shrink-0">
+              C
+            </div>
+            <div>
+              <span className="font-extrabold tracking-tight text-base sm:text-lg text-white">
+                CONTRACT<span className="font-light italic text-blue-400">S</span>
+              </span>
+              <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 text-[9px] font-mono rounded-full bg-blue-500/15 text-blue-300 border border-blue-400/30 font-bold uppercase tracking-wider">
+                E-Sign
+              </span>
+            </div>
+          </div>
 
-      {/* Top Header Navigation Bar with Menu toggle */}
-      <NavigationBar
-        activeTab={navTab}
-        setActiveTab={setNavTab}
-        onOpenCreateModal={() => {
-          setPresetOccupation(null);
-          setShowCreateModal(true);
-        }}
-        currentUser={currentUser}
-        userOccupation={userOccupation}
-        userBusinessProfile={userBusinessProfile}
-        onOpenOccupationModal={() => setShowOccupationModal(true)}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
-        onSignOut={handleSignOut}
-        selectedCurrency={selectedCurrency}
-        onCurrencyChange={setSelectedCurrency}
-        selectedLanguage={selectedLanguage}
-        onLanguageChange={setSelectedLanguage}
-        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        isSidebarOpen={isSidebarOpen}
-      />
+          {/* Quick Header Controls */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Currency Selector */}
+            <div className="flex items-center gap-1 bg-slate-800/90 border border-slate-700/80 rounded-lg sm:rounded-xl px-1.5 sm:px-2 py-1">
+              <DollarSign className="w-3 h-3 text-slate-400 shrink-0" />
+              <select
+                value={selectedCurrency}
+                onChange={(e) => setSelectedCurrency(e.target.value)}
+                className="bg-transparent text-[11px] sm:text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer pr-0.5"
+              >
+                {CURRENCY_LIST.map((c) => (
+                  <option key={c.code} value={c.code} className="bg-slate-900 text-white">
+                    {c.symbol} {c.code}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {/* Main View Area based on active navigation item */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-        {navTab === 'contracts' && (
-          <AdminDashboard
-            contracts={userContracts}
-            user={currentUser}
-            userOccupation={userOccupation}
-            userBusinessProfile={userBusinessProfile}
-            onOpenOccupationModal={() => setShowOccupationModal(true)}
-            onOpenAuthModal={() => setIsAuthModalOpen(true)}
-            onSignOut={handleSignOut}
-            onCreateContract={handleCreateContract}
-            onUpdateContract={handleUpdateContract}
-            onCompleteContract={handleCompleteContract}
-            onInvalidateLink={handleInvalidateLink}
-            onDeleteContract={handleDeleteContract}
-            onOpenClientPortal={(contract) => setActiveClientContract(contract)}
+            {/* Language Selector */}
+            <div className="hidden md:flex items-center gap-1 bg-slate-800/90 border border-slate-700/80 rounded-lg sm:rounded-xl px-2 py-1">
+              <Globe className="w-3 h-3 text-slate-400 shrink-0" />
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer pr-1"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code} className="bg-slate-900 text-white">
+                    {l.flag} {l.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Back to Start or New Draft Button */}
+            {isDrafting && !justCreatedContract && (
+              <button
+                onClick={() => setIsDrafting(false)}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                <span className="hidden xs:inline sm:inline">Back</span>
+              </button>
+            )}
+
+            {justCreatedContract && (
+              <button
+                onClick={handleDraftNew}
+                className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+              >
+                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden xs:inline sm:inline">Draft Another</span>
+                <span className="xs:hidden sm:hidden">New</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Page Area */}
+      <main className="flex-1 w-full pb-16">
+        {justCreatedContract ? (
+          <ContractReadyView
+            contract={justCreatedContract}
+            onOpenSigningPortal={(c) => setActiveClientContract(c)}
+            onDraftNewContract={handleDraftNew}
           />
-        )}
-
-        {navTab === 'occupations' && (
-          <OccupationsLibrary
-            onSelectOccupation={handleLaunchOccupationDraft}
-            currency={selectedCurrency}
-          />
-        )}
-
-        {navTab === 'currency' && (
-          <CurrencyManager
-            selectedCurrency={selectedCurrency}
-            onSelectCurrency={setSelectedCurrency}
-          />
-        )}
-
-        {navTab === 'language' && (
-          <LanguageManager
-            selectedLanguage={selectedLanguage}
-            onSelectLanguage={setSelectedLanguage}
-          />
+        ) : isDrafting ? (
+          <div className="space-y-4">
+            <ContractForm
+              isStandalone={true}
+              defaultCurrency={selectedCurrency}
+              defaultLanguage={selectedLanguage}
+              onSave={handleCreateContract}
+              onCancel={() => setIsDrafting(false)}
+            />
+          </div>
+        ) : (
+          <BlankStarterPage onStartDrafting={() => setIsDrafting(true)} />
         )}
       </main>
 
-      {/* Contract Drafter / Create Modal */}
-      {showCreateModal && (
-        <ContractForm
-          defaultOccupation={presetOccupation || userOccupation}
-          defaultBusinessProfile={userBusinessProfile}
-          defaultCurrency={selectedCurrency}
-          defaultLanguage={selectedLanguage}
-          onSave={handleCreateContract}
-          onCancel={() => {
-            setShowCreateModal(false);
-            setPresetOccupation(null);
-          }}
-        />
-      )}
+      {/* Minimal Footer */}
+      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
+        <p>Simple 1-Use Contract Drafter & E-Signature Suite • Legally Binding PDF Output</p>
+      </footer>
 
-      {/* Occupation Selection Modal (Pops up for new accounts or when user wants to switch) */}
-      <OccupationSelectModal
-        isOpen={showOccupationModal}
-        onClose={() => setShowOccupationModal(false)}
-        onSelectOccupation={handleSelectOccupation}
-        currentUser={currentUser}
-        initialOccupation={userOccupation}
-        initialBusinessProfile={userBusinessProfile}
-      />
-
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={(user) => setCurrentUser(user)}
-      />
     </div>
   );
 }
-

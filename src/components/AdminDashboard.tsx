@@ -584,6 +584,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               )}
 
+              {/* Download PDF */}
+              <button
+                onClick={() => {
+                  generateContractPDF(mobileActionContract);
+                  setMobileActionContract(null);
+                }}
+                className="w-full flex items-center gap-3 p-3.5 bg-slate-800 hover:bg-slate-700 rounded-2xl text-white font-medium cursor-pointer"
+              >
+                <Download className="w-4 h-4 text-blue-400" />
+                <span>Download Official PDF Document</span>
+              </button>
+
               {/* Copy Signing Link */}
               {!mobileActionContract.status.includes('completed') && !mobileActionContract.linkInvalidated && (
                 <button

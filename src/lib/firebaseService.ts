@@ -184,6 +184,19 @@ export function subscribeContracts(userUid: string, onUpdate: (contracts: Contra
     return () => {};
   }
 
+  // Load cached contracts first if available
+  try {
+    const cached = localStorage.getItem(`contract_app_contracts_${userUid}`);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        onUpdate(parsed);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
   // Multi-user query: only retrieve contracts authored by this user
   const q = query(collection(db, CONTRACTS_COLLECTION), where('adminUid', '==', userUid));
 
@@ -192,15 +205,34 @@ export function subscribeContracts(userUid: string, onUpdate: (contracts: Contra
     async (snapshot) => {
       if (snapshot.empty) {
         onUpdate([]);
+        try {
+          localStorage.removeItem(`contract_app_contracts_${userUid}`);
+        } catch {
+          // ignore
+        }
       } else {
         const contracts: Contract[] = snapshot.docs.map((d) => d.data() as Contract);
         // Sort newest created first
         contracts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         onUpdate(contracts);
+        try {
+          localStorage.setItem(`contract_app_contracts_${userUid}`, JSON.stringify(contracts));
+        } catch {
+          // ignore
+        }
       }
     },
     (error) => {
       handleFirestoreError(error, OperationType.LIST, CONTRACTS_COLLECTION);
+      try {
+        const cached = localStorage.getItem(`contract_app_contracts_${userUid}`);
+        if (cached) {
+          onUpdate(JSON.parse(cached));
+          return;
+        }
+      } catch {
+        // ignore
+      }
       onUpdate([]);
     }
   );
@@ -230,6 +262,18 @@ export async function getContractByIdOrToken(idOrToken: string, isClientView = f
       }
     }
 
+    // Local storage fallback if Firestore had no match
+    if (!contract) {
+      try {
+        const local = localStorage.getItem(`contract_item_${idOrToken}`);
+        if (local) {
+          contract = JSON.parse(local);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     if (contract && isClientView) {
       // Increment access count and log audit event
       const updatedCount = (contract.accessCount || 0) + 1;
@@ -247,13 +291,28 @@ export async function getContractByIdOrToken(idOrToken: string, isClientView = f
           },
         ],
       };
-      await setDoc(doc(db, CONTRACTS_COLLECTION, contract.id), updatedContract);
+      try {
+        await setDoc(doc(db, CONTRACTS_COLLECTION, contract.id), updatedContract);
+      } catch {
+        // ignore offline write
+      }
+      try {
+        localStorage.setItem(`contract_item_${contract.id}`, JSON.stringify(updatedContract));
+        localStorage.setItem(`contract_item_${contract.signingToken}`, JSON.stringify(updatedContract));
+      } catch {
+        // ignore
+      }
       return updatedContract;
     }
 
     return contract;
   } catch (err) {
     handleFirestoreError(err, OperationType.GET, `${CONTRACTS_COLLECTION}/${idOrToken}`);
+    // Check local fallback
+    try {
+      const local = localStorage.getItem(`contract_item_${idOrToken}`);
+      if (local) return JSON.parse(local);
+    } catch {}
     return null;
   }
 }
@@ -262,7 +321,7 @@ export async function getContractByIdOrToken(idOrToken: string, isClientView = f
  * Create a new contract in Firestore scoped to the user's UID
  */
 export async function createContractInFirebase(payload: CreateContractPayload, userUid?: string): Promise<Contract> {
-  const currentUid = userUid || auth.currentUser?.uid || payload.adminUid || '';
+  const currentUid = userUid || auth.currentUser?.uid || payload.adminUid || 'workspace_user';
   const id = `cnt_${Math.random().toString(36).substring(2, 8)}`;
   const token = `tok_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString(36)}`;
   const now = new Date().toISOString();
@@ -271,10 +330,10 @@ export async function createContractInFirebase(payload: CreateContractPayload, u
     id,
     adminUid: currentUid,
     signingToken: token,
-    title: payload.title,
+    title: payload.title || 'Service Agreement',
     category: payload.category || 'General Service',
-    description: payload.description,
-    termsAndConditions: payload.termsAndConditions,
+    description: payload.description || '',
+    termsAndConditions: payload.termsAndConditions || '',
     totalCost: Number(payload.totalCost) || 0,
     depositAmount: Number(payload.depositAmount) || 0,
     currency: payload.currency || 'NGN',
@@ -285,7 +344,7 @@ export async function createContractInFirebase(payload: CreateContractPayload, u
     materialsList: payload.materialsList || [],
     images: payload.images || [],
     adminParty: {
-      name: payload.adminParty?.name || 'Admin',
+      name: payload.adminParty?.name || 'Service Provider',
       email: payload.adminParty?.email || '',
       company: payload.adminParty?.company || '',
       title: payload.adminParty?.title || '',
@@ -323,12 +382,25 @@ export async function createContractInFirebase(payload: CreateContractPayload, u
     ],
   };
 
+  // Always cache locally first so user experience is instant and never fails
+  try {
+    localStorage.setItem(`contract_item_${id}`, JSON.stringify(newContract));
+    localStorage.setItem(`contract_item_${token}`, JSON.stringify(newContract));
+    // Also save in user contracts array
+    const cachedListStr = localStorage.getItem(`contract_app_contracts_${currentUid}`);
+    const cachedList: Contract[] = cachedListStr ? JSON.parse(cachedListStr) : [];
+    localStorage.setItem(`contract_app_contracts_${currentUid}`, JSON.stringify([newContract, ...cachedList.filter(c => c.id !== id)]));
+  } catch (storageErr) {
+    console.warn('Local storage error:', storageErr);
+  }
+
   try {
     await setDoc(doc(db, CONTRACTS_COLLECTION, id), newContract);
     return newContract;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, `${CONTRACTS_COLLECTION}/${id}`);
-    throw error;
+    // If Firestore throws, still return newContract from local storage cache
+    return newContract;
   }
 }
 

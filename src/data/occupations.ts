@@ -14,7 +14,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- FASHION, APPAREL & TAILORING (1-10) ---
   {
     id: 'tailor-bespoke',
-    title: 'Custom Tailor & Fashion Designer',
+    title: 'Fashion Design & Bespoke Tailoring',
     category: 'Fashion & Apparel',
     iconName: 'Scissors',
     defaultScope: `Tailor agrees to measure, pattern, cut, stitch, and deliver bespoke traditional and ceremonial outfits according to agreed fittings and style designs. Includes up to two fitting sessions prior to final hem and finishing.`,
@@ -29,7 +29,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'fashion-embroidery',
-    title: 'Bespoke Embroidery & Beading Specialist',
+    title: 'Embroidery & Beading',
     category: 'Fashion & Apparel',
     iconName: 'Sparkles',
     defaultScope: `Handcraft custom beadwork, lace applique, metallic thread embroidery, and crystal embellishments on evening gowns, bridal dresses, or ceremonial agbada garments.`,
@@ -42,7 +42,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'cobbler-shoe-maker',
-    title: 'Custom Shoemaker & Leather Cordwainer',
+    title: 'Shoemaking & Footwear Craft',
     category: 'Fashion & Apparel',
     iconName: 'Footprints',
     defaultScope: `Craft custom leather shoes, boots, or sandals tailored to client foot measurements, including hand-welted leather soles, stacked heels, and custom polish finish.`,
@@ -55,7 +55,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'leather-craftsman',
-    title: 'Leather Artisan & Bag Maker',
+    title: 'Leathercraft & Bag Making',
     category: 'Fashion & Apparel',
     iconName: 'Briefcase',
     defaultScope: `Design and hand-stitch premium leather briefcases, handbags, wallets, or luggage with reinforced brass hardware, suede lining, and burnished edges.`,
@@ -68,7 +68,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'upholsterer-furniture',
-    title: 'Furniture Upholsterer & Fabric Restorer',
+    title: 'Furniture Upholstery',
     category: 'Fashion & Apparel',
     iconName: 'Armchair',
     defaultScope: `Re-upholster sofa sets, armchairs, or vehicle interiors. Includes foam replacement, spring tensioning, frame repair, and precision fabric stapling.`,
@@ -80,7 +80,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'milliner-hatmaker',
-    title: 'Bespoke Milliner & Fascinator Maker',
+    title: 'Hatmaking & Millinery',
     category: 'Fashion & Apparel',
     iconName: 'Crown',
     defaultScope: `Design custom fascinators, brimmed hats, and bridal headpieces for weddings, galas, and official ceremonies.`,
@@ -91,7 +91,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'screen-printer',
-    title: 'Apparel Screen Printer & Textile Decorator',
+    title: 'Screen Printing & Apparel',
     category: 'Fashion & Apparel',
     iconName: 'Printer',
     defaultScope: `Screen print or heat transfer custom logos, text, and artwork across bulk order t-shirts, jerseys, uniforms, or promotional tote bags.`,
@@ -102,7 +102,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'curtain-drapery-maker',
-    title: 'Curtain & Drapery Specialist',
+    title: 'Curtains & Drapery',
     category: 'Fashion & Apparel',
     iconName: 'Columns',
     defaultScope: `Measure, stitch, line, and install custom window curtains, blackout drapes, sheer sheer panels, and motorized curtain tracks.`,
@@ -113,7 +113,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'uniform-manufacturer',
-    title: 'Corporate & School Uniform Manufacturer',
+    title: 'Uniform Manufacturing',
     category: 'Fashion & Apparel',
     iconName: 'Shirt',
     defaultScope: `Manufacture bulk staff or school uniforms including embroidered chest logos, durable stitching, and reinforced pockets.`,
@@ -124,7 +124,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'jewelry-goldsmith',
-    title: 'Custom Jewelry Artisan & Goldsmith',
+    title: 'Jewelry & Goldsmithing',
     category: 'Fashion & Apparel',
     iconName: 'Gem',
     defaultScope: `Forge custom gold, silver, or platinum rings, necklaces, or bracelets with gemstone setting, engraving, and hallmarking.`,
@@ -137,7 +137,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- CARPENTRY, WOODWORKING & FURNITURE (11-20) ---
   {
     id: 'carpenter-cabinetmaker',
-    title: 'Master Carpenter & Cabinetmaker',
+    title: 'Carpentry & Cabinetmaking',
     category: 'Woodworking & Carpentry',
     iconName: 'Hammer',
     defaultScope: `Construct and install custom solid wood kitchen cabinets, wardrobes, bookcases, or dining tables with concealed soft-close hinges and durable varnish.`,
@@ -151,7 +151,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'roofing-carpenter',
-    title: 'Roofing Framework Carpenter',
+    title: 'Roofing Framework',
     category: 'Woodworking & Carpentry',
     iconName: 'Home',
     defaultScope: `Erect timber roof trusses, ridge beams, rafters, and fascia boards according to architectural structural drawings.`,
@@ -163,7 +163,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'flooring-carpenter',
-    title: 'Parquet & Hardwood Flooring Specialist',
+    title: 'Hardwood & Parquet Flooring',
     category: 'Woodworking & Carpentry',
     iconName: 'Grid',
     defaultScope: `Lay, sand, stain, and seal solid hardwood floorboards, herringbone parquet blocks, or heavy-duty laminate wood flooring.`,
@@ -174,7 +174,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'door-window-carpenter',
-    title: 'Wooden Door & Window Frame Joiner',
+    title: 'Doors & Window Joinery',
     category: 'Woodworking & Carpentry',
     iconName: 'DoorClosed',
     defaultScope: `Fabricate and hang custom solid hardwood security entrance doors, panel interior doors, and carved wooden window frames with locks.`,
@@ -185,7 +185,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'formwork-carpenter',
-    title: 'Concrete Formwork & Shuttering Carpenter',
+    title: 'Concrete Formwork',
     category: 'Woodworking & Carpentry',
     iconName: 'Box',
     defaultScope: `Build rigid timber and marine plywood formwork moulds for reinforced concrete columns, beams, suspended slabs, and staircases.`,
@@ -196,7 +196,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'carver-sculptor',
-    title: 'Wood Carver & Sculptural Artisan',
+    title: 'Wood Carving & Sculpture',
     category: 'Woodworking & Carpentry',
     iconName: 'Feather',
     defaultScope: `Carve intricate relief panels, decorative wall plaques, carved furniture legs, or traditional ceremonial wooden sculptures.`,
@@ -207,7 +207,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'decking-carpenter',
-    title: 'Outdoor Timber Decking & Pergola Builder',
+    title: 'Decking & Pergolas',
     category: 'Woodworking & Carpentry',
     iconName: 'Sun',
     defaultScope: `Construct weather-resistant outdoor timber decks, pool surrounds, wooden pergolas, and garden pavilions.`,
@@ -218,7 +218,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'stage-set-builder',
-    title: 'Stage & Event Set Construction Builder',
+    title: 'Stage & Event Sets',
     category: 'Woodworking & Carpentry',
     iconName: 'Tv',
     defaultScope: `Build temporary timber stages, display booths, backdrop frames, and exhibition structures for events and concerts.`,
@@ -229,7 +229,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'picture-framer',
-    title: 'Custom Picture Framer & Mount Maker',
+    title: 'Picture Framing',
     category: 'Woodworking & Carpentry',
     iconName: 'Image',
     defaultScope: `Handcraft ornate wooden picture frames with museum-grade acid-free matting and anti-reflective UV protective glass.`,
@@ -240,7 +240,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'boatbuilder-carpenter',
-    title: 'Wooden Boat Builder & Marine Carpenter',
+    title: 'Boat Building & Marine Wood',
     category: 'Woodworking & Carpentry',
     iconName: 'Anchor',
     defaultScope: `Construct or repair wooden boat hulls, decks, oars, and marine cabinetry using water-resistant epoxy resins and stainless fasteners.`,
@@ -253,7 +253,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- WELDING, METALWORK & FABRICATION (21-30) ---
   {
     id: 'welder-structural',
-    title: 'Structural Welder & Steel Fabricator',
+    title: 'Structural Steel Welding',
     category: 'Metalwork & Welding',
     iconName: 'Flame',
     defaultScope: `Fabricate, align, and weld structural I-beams, steel warehouse frames, heavy steel gates, security doors, and metal staircases according to structural engineering drawings.`,
@@ -269,7 +269,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'wrought-iron-craftsman',
-    title: 'Wrought Iron Gate & Railing Fabricator',
+    title: 'Wrought Iron & Metal Railings',
     category: 'Metalwork & Welding',
     iconName: 'Shield',
     defaultScope: `Design, forge, and install ornamental wrought iron security entrance gates, balcony balustrades, staircase railings, and burglar proofing.`,
@@ -280,7 +280,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'stainless-welder',
-    title: 'Stainless Steel & TIG Pipe Welder',
+    title: 'Stainless Steel & TIG Welding',
     category: 'Metalwork & Welding',
     iconName: 'Zap',
     defaultScope: `TIG weld food-grade stainless steel piping, handrails, kitchen extraction hoods, and pharmaceutical processing tanks with mirror finish polishing.`,
@@ -291,7 +291,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'aluminum-fabricator',
-    title: 'Aluminum Window & Glass Curtain Wall Fabricator',
+    title: 'Aluminum Windows & Facades',
     category: 'Metalwork & Welding',
     iconName: 'Layout',
     defaultScope: `Fabricate and install aluminum sliding windows, projected casements, glass curtain walls, and automatic sliding glass storefronts.`,
@@ -303,7 +303,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'blacksmith-forger',
-    title: 'Artisan Blacksmith & Tool Smith',
+    title: 'Blacksmithing & Tool Forging',
     category: 'Metalwork & Welding',
     iconName: 'Hammer',
     defaultScope: `Forge custom iron tools, decorative hinges, blades, fireplace hearth sets, and architectural metal fittings in anvil furnace.`,
@@ -314,7 +314,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'sheet-metal-worker',
-    title: 'Sheet Metal & Ductwork Fabricator',
+    title: 'Sheet Metal & Ductwork',
     category: 'Metalwork & Welding',
     iconName: 'Box',
     defaultScope: `Cut, bend, roll, and assemble galvanized sheet metal HVAC air ducts, exhaust hoods, gutters, and metal chimney flues.`,
@@ -325,7 +325,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'tank-fabricator',
-    title: 'Industrial Fuel & Water Storage Tank Welder',
+    title: 'Storage Tanks & Vessels',
     category: 'Metalwork & Welding',
     iconName: 'Database',
     defaultScope: `Construct heavy plate steel diesel storage tanks, overhead water towers, or pressure vessels with dye penetrant weld testing.`,
@@ -336,7 +336,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'auto-body-welder',
-    title: 'Automotive Chassis & Body Welder',
+    title: 'Auto Body & Chassis Welding',
     category: 'Metalwork & Welding',
     iconName: 'Truck',
     defaultScope: `Repair vehicle chassis frames, weld truck bed bodies, patch rusted floor panels, and reinforce heavy trailer hitches.`,
@@ -347,7 +347,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'scaffold-welder',
-    title: 'Modular Metal Scaffolding Manufacturer',
+    title: 'Scaffolding Fabrication',
     category: 'Metalwork & Welding',
     iconName: 'Layers',
     defaultScope: `Fabricate heavy duty steel ringlock scaffolding frames, cross braces, adjustable screw jacks, and metal walking boards.`,
@@ -358,7 +358,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'fencing-fabricator',
-    title: 'Security Razor Wire & Perimeter Mesh Fabricator',
+    title: 'Security Fencing & Gates',
     category: 'Metalwork & Welding',
     iconName: 'Lock',
     defaultScope: `Install anti-climb 3D mesh security fencing, concertina razor wire coils, anti-crash bollards, and automated gate motors.`,
@@ -371,7 +371,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- ELECTRICAL, PLUMBING & HVAC (31-40) ---
   {
     id: 'electrician-master',
-    title: 'Master Electrician & Power Installer',
+    title: 'Electrical Installation & Power',
     category: 'Electrical & Power',
     iconName: 'Zap',
     defaultScope: `Complete conduit piping, cable drawing, distribution board (DB) wiring, circuit breaker sizing, earthing pit installation, light fixtures, and socket points.`,
@@ -385,7 +385,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'solar-installer',
-    title: 'Solar Inverter & Renewable Energy Engineer',
+    title: 'Solar & Renewable Energy',
     category: 'Electrical & Power',
     iconName: 'Sun',
     defaultScope: `Design, mount, wire, and commission off-grid/hybrid solar power systems including solar panels, lithium battery banks, MPPT charge controllers, and pure sine wave inverters.`,
@@ -398,7 +398,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'plumber-master',
-    title: 'Master Plumber & Sanitary Engineer',
+    title: 'Plumbing & Sanitation',
     category: 'Plumbing & Sanitation',
     iconName: 'Droplet',
     defaultScope: `Install PPR/PEX clean water pressure piping, PVC soil waste drainage, water pumps, water heaters, water storage tanks, and luxury bathroom sanitary ware.`,
@@ -411,7 +411,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'hvac-technician',
-    title: 'HVAC & Central Air Conditioning Technician',
+    title: 'HVAC & Air Conditioning',
     category: 'HVAC & Climate',
     iconName: 'Wind',
     defaultScope: `Install, duct, wire, evacuate, and charge VRF central air conditioning systems, ceiling cassette units, or industrial split ACs with refrigerant pressure testing.`,
@@ -423,7 +423,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'borehole-driller',
-    title: 'Hydro-Geological Borehole Driller',
+    title: 'Borehole Drilling & Pumps',
     category: 'Plumbing & Sanitation',
     iconName: 'Compass',
     defaultScope: `Drill water borehole down to aquiferous rock strata, install heavy duty PVC casing pipes, gravel pack filter, submersible water pump, and water treatment filtration plant.`,
@@ -435,7 +435,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'generator-technician',
-    title: 'Heavy Diesel Generator Mechanic & Electrician',
+    title: 'Diesel Generator Maintenance',
     category: 'Electrical & Power',
     iconName: 'Activity',
     defaultScope: `Install, service, overhaul, and synchronize heavy diesel power generators, Automatic Transfer Switches (ATS), soundproof canopies, and fuel piping.`,
@@ -446,7 +446,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'fire-safety-engineer',
-    title: 'Fire Alarm & Suppression Systems Engineer',
+    title: 'Fire Alarms & Safety Systems',
     category: 'Electrical & Power',
     iconName: 'AlertTriangle',
     defaultScope: `Install addressable fire alarm panels, smoke detectors, sprinkler piping, fire hose reels, and CO2 fire suppression systems.`,
@@ -457,7 +457,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'cctv-security-installer',
-    title: 'CCTV Security & Access Control Installer',
+    title: 'CCTV & Access Control',
     category: 'Electrical & Power',
     iconName: 'Shield',
     defaultScope: `Mount 4K IP CCTV cameras, draw CAT6 network cables, setup Network Video Recorders (NVR), biometric door access controllers, and electric gate barriers.`,
@@ -469,7 +469,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'elevator-technician',
-    title: 'Elevator & Lift Maintenance Specialist',
+    title: 'Elevator & Lift Systems',
     category: 'Electrical & Power',
     iconName: 'ArrowUpRight',
     defaultScope: `Assemble passenger elevator guide rails, traction gear machine, cabin interior, floor indicator call panels, and safety governor brake systems.`,
@@ -480,7 +480,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'pool-maintenance',
-    title: 'Swimming Pool & Spa Filtration Installer',
+    title: 'Swimming Pool Installation',
     category: 'Plumbing & Sanitation',
     iconName: 'Maximize',
     defaultScope: `Plumb pool circulation pipes, install sand filters, chlorinator pumps, LED underwater lights, and tile pool basins.`,
@@ -493,7 +493,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- MASONRY, BUILDING & CONSTRUCTION (41-50) ---
   {
     id: 'mason-bricklayer',
-    title: 'Master Mason & Bricklayer',
+    title: 'Masonry & Bricklaying',
     category: 'Construction & Building',
     iconName: 'Layers',
     defaultScope: `Lay hollow/solid concrete blocks, build foundation footings, damp-proof courses (DPC), concrete lintels, columns, and smooth wall plastering/rendering.`,
@@ -507,7 +507,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'tiler-marble-installer',
-    title: 'Tile, Marble & Granite Installer',
+    title: 'Tiling & Marble Installation',
     category: 'Construction & Building',
     iconName: 'Grid',
     defaultScope: `Lay ceramic floor tiles, porcelain wall tiles, polished marble slabs, or granite kitchen countertops with laser level alignment and waterproof grouting.`,
@@ -519,7 +519,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'painter-decorator',
-    title: 'Professional Painter & Wall Decorator',
+    title: 'Painting & Wall Decoration',
     category: 'Construction & Building',
     iconName: 'Palette',
     defaultScope: `Screed interior walls, apply anti-fungal primer coat, and paint multiple coats of premium washable emulsion paint on interior and exterior walls.`,
@@ -531,7 +531,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'roofer-aluminum',
-    title: 'Aluminum Longspan & Roofing Contractor',
+    title: 'Roofing & Sheet Installation',
     category: 'Construction & Building',
     iconName: 'Home',
     defaultScope: `Install step-tiles or corrugated aluminum longspan roof sheets, ridge caps, valley gutters, and rainwater downspouts with leak-proof neoprene washers.`,
@@ -542,7 +542,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'pop-false-ceiling',
-    title: 'POP & Gypsum False Ceiling Installer',
+    title: 'POP & False Ceilings',
     category: 'Construction & Building',
     iconName: 'Square',
     defaultScope: `Erect galvanised ceiling steel channels, screw plasterboards, cast ornamental POP cornices, tape joints, and sand for recessed LED cove lighting.`,
@@ -553,7 +553,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'waterproofing-specialist',
-    title: 'Building Waterproofing & Damp Specialist',
+    title: 'Waterproofing & Sealing',
     category: 'Construction & Building',
     iconName: 'ShieldAlert',
     defaultScope: `Torch apply torch-on bituminous waterproofing membranes, crystalline slurry coatings on basements, flat roofs, gutters, and wet room floors.`,
@@ -564,7 +564,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'glazier-glass',
-    title: 'Architectural Glazier & Glass Facade Specialist',
+    title: 'Glazing & Glass Installation',
     category: 'Construction & Building',
     iconName: 'Maximize2',
     defaultScope: `Install frameless glass shower enclosures, glass balustrades, storefront glass doors, and insulated double-glazed window panels.`,
@@ -575,7 +575,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'interlocking-paving',
-    title: 'Interlocking Stone Paving & Landscaping Installer',
+    title: 'Paving & Landscaping',
     category: 'Construction & Building',
     iconName: 'Grid',
     defaultScope: `Excavate driveway soil, lay stone dust base course, compact, and lay 60mm/80mm interlocking concrete paving stones with edge kerbs.`,
@@ -586,7 +586,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'insulation-contractor',
-    title: 'Thermal & Sound Insulation Installer',
+    title: 'Thermal & Sound Insulation',
     category: 'Construction & Building',
     iconName: 'VolumeX',
     defaultScope: `Install rockwool acoustic batts, fiberglass thermal insulation rolls, or spray polyurethane foam inside drywall cavities and roof lofts.`,
@@ -597,7 +597,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'demolition-contractor',
-    title: 'Demolition & Site Clearance Contractor',
+    title: 'Demolition & Site Clearance',
     category: 'Construction & Building',
     iconName: 'Trash2',
     defaultScope: `Safely demolish targeted reinforced concrete walls or structures, sort recyclable metal scrap, load rubble into tipper trucks, and leave site clean.`,
@@ -610,7 +610,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- AUTOMOTIVE, MACHINERY & REPAIR (51-60) ---
   {
     id: 'auto-mechanic',
-    title: 'Automotive Engine Repair & Mechanic',
+    title: 'Auto Mechanics & Engine Repair',
     category: 'Automotive & Repair',
     iconName: 'Wrench',
     defaultScope: `Perform computer diagnostic scan, replace timing belt, overhaul engine cylinder head, replace spark plugs, change synthetic oil and filters, and road test vehicle.`,
@@ -623,7 +623,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'auto-electrician',
-    title: 'Auto Electrician & ECU Diagnostician',
+    title: 'Auto Electrical & Diagnostics',
     category: 'Automotive & Repair',
     iconName: 'Cpu',
     defaultScope: `Diagnose CAN-bus electrical faults, repair alternator wiring, re-flash Engine Control Unit (ECU), install keyless alarm, and replace dead starter motors.`,
@@ -634,7 +634,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'auto-body-painter',
-    title: 'Auto Body Panel Beater & Spray Painter',
+    title: 'Auto Body & Spray Painting',
     category: 'Automotive & Repair',
     iconName: 'Sparkles',
     defaultScope: `Pull vehicle body panel dents, fill body lines with polyester putty, prime, and spray 2K oven-baked acrylic polyurethane paint with clear coat polishing.`,
@@ -645,7 +645,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'auto-detailer',
-    title: 'Auto Detailer & Ceramic Coating Specialist',
+    title: 'Auto Detailing & Ceramic Coating',
     category: 'Automotive & Repair',
     iconName: 'ShieldCheck',
     defaultScope: `Decontaminate paint, 2-stage machine paint correction to eliminate swirl marks, apply 9H ceramic coating layer on paint and glass, and deep steam clean interior.`,
@@ -656,7 +656,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'marine-mechanic',
-    title: 'Outboard Marine Engine Mechanic',
+    title: 'Marine Engine Repair',
     category: 'Automotive & Repair',
     iconName: 'Anchor',
     defaultScope: `Service marine outboard boat engines, replace cooling water pump impellers, flush carburetor fuel jets, replace spark plugs, and test propeller drive.`,
@@ -667,7 +667,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'heavy-equipment-mechanic',
-    title: 'Heavy Plant & Excavator Hydraulic Technician',
+    title: 'Heavy Plant & Hydraulics',
     category: 'Automotive & Repair',
     iconName: 'Truck',
     defaultScope: `Replace hydraulic pump seals, rebuild excavator main control valves, re-bush boom cylinder pins, and change high pressure hydraulic fluid filters.`,
@@ -678,7 +678,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'motorcycle-repairer',
-    title: 'Motorcycle & Tricycle Repairer',
+    title: 'Motorcycle Repair',
     category: 'Automotive & Repair',
     iconName: 'Compass',
     defaultScope: `Replace drive chain and sprockets, rebuild front fork shock absorbers, tune carburetor, change brake pads, and align motorcycle wheels.`,
@@ -689,7 +689,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'tire-wheel-specialist',
-    title: 'Tire Specialist & Wheel Alignment Technician',
+    title: 'Tires & Wheel Alignment',
     category: 'Automotive & Repair',
     iconName: 'Disc',
     defaultScope: `Mount fresh tires, perform 3D laser wheel alignment, dynamic wheel balancing, and repair tubeless tire punctures.`,
@@ -700,7 +700,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'air-brake-mechanic',
-    title: 'Truck Air Brake & Trailer Specialist',
+    title: 'Truck Air Brakes',
     category: 'Automotive & Repair',
     iconName: 'Octagon',
     defaultScope: `Overhaul heavy truck air brake valves, replace brake shoes, change air dryer cartridges, and leak test pneumatic trailer lines.`,
@@ -711,7 +711,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'small-engine-repair',
-    title: 'Lawnmower & Small Gasoline Engine Repairer',
+    title: 'Small Engine Repair',
     category: 'Automotive & Repair',
     iconName: 'Settings',
     defaultScope: `Service small gasoline engines on lawnmowers, water pumps, and power washers; sharpen cutting blades, replace recoil pull starter cord, and clean carburetor.`,
@@ -724,7 +724,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- DESIGN, CREATIVE & DIGITAL SERVICES (61-75) ---
   {
     id: 'graphic-designer',
-    title: 'Brand Designer & Graphic Artist',
+    title: 'Graphic & Brand Design',
     category: 'Creative & Design',
     iconName: 'Feather',
     defaultScope: `Create custom visual brand identity including primary logo, secondary marks, brand color palette, typography guidelines, business cards, and social media brand templates.`,
@@ -736,7 +736,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'ui-ux-designer',
-    title: 'UI/UX & Mobile App Product Designer',
+    title: 'UI/UX & Product Design',
     category: 'Creative & Design',
     iconName: 'Layout',
     defaultScope: `Conduct user research, design wireframes, interactive Figma prototypes, component design systems, and responsive screen UI layouts for web/mobile applications.`,
@@ -747,7 +747,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'architectural-3d-visualizer',
-    title: 'Architectural 3D Modeler & Renderer',
+    title: '3D Architecture & Rendering',
     category: 'Creative & Design',
     iconName: 'Box',
     defaultScope: `Convert 2D CAD floorplans into photorealistic 3D architectural exterior renderings, interior walk-through animations, and material lighting studies.`,
@@ -758,7 +758,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'photographer-commercial',
-    title: 'Commercial & Portrait Photographer',
+    title: 'Photography & Portraits',
     category: 'Creative & Design',
     iconName: 'Camera',
     defaultScope: `Provide photo shoot coverage, studio lighting setup, professional image retouching, color grading, and delivery of high-resolution digital photo gallery.`,
@@ -769,7 +769,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'videographer-editor',
-    title: 'Video Producer & Cinema Editor',
+    title: 'Video Production & Editing',
     category: 'Creative & Design',
     iconName: 'Video',
     defaultScope: `Shoot multi-camera 4K video footage, record crisp lavalier audio, edit color-graded video package with sound design, licensed music, and motion titles.`,
@@ -780,7 +780,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'interior-decorator',
-    title: 'Interior Decorator & Space Stylist',
+    title: 'Interior Design & Styling',
     category: 'Creative & Design',
     iconName: 'Home',
     defaultScope: `Develop interior design mood boards, select furniture, procure decorative art pieces, coordinate paint colors, and style residential or corporate space.`,
@@ -791,7 +791,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'landscape-architect',
-    title: 'Landscape Architect & Garden Designer',
+    title: 'Landscape & Garden Design',
     category: 'Creative & Design',
     iconName: 'Sun',
     defaultScope: `Design outdoor garden layouts, select ornamental plants and lawn turf, plan outdoor lighting, stone pathways, and automated irrigation sprinklers.`,
@@ -802,7 +802,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'sound-engineer-producer',
-    title: 'Audio Mixing & Master Sound Engineer',
+    title: 'Sound Engineering & Audio',
     category: 'Creative & Design',
     iconName: 'Music',
     defaultScope: `Record vocal tracks, mix multi-track audio session, apply EQ, compression, reverb, and master audio track to streaming loudness standards (-14 LUFS).`,
@@ -813,7 +813,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'copywriter-content-creator',
-    title: 'Commercial Copywriter & Content Strategist',
+    title: 'Copywriting & Content',
     category: 'Creative & Design',
     iconName: 'FileText',
     defaultScope: `Write compelling website landing page copy, sales email sequences, product descriptions, and brand press releases engineered for conversions.`,
@@ -824,7 +824,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'illustrator-animator',
-    title: '2D/3D Character Illustrator & Animator',
+    title: 'Illustration & Animation',
     category: 'Creative & Design',
     iconName: 'Film',
     defaultScope: `Create custom character illustrations, storyboards, and 60-second animated explainer video with voiceover sync and sound effects.`,
@@ -835,7 +835,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'signage-billboard-maker',
-    title: '3D LED Signage & Neon Sign Fabricator',
+    title: 'Signage & Neon Fabrication',
     category: 'Creative & Design',
     iconName: 'Tv',
     defaultScope: `Fabricate 3D acrylic illuminated channel letters, outdoor LED lightbox signage, or custom flex neon signboards for storefront branding.`,
@@ -846,7 +846,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'event-decorator',
-    title: 'Event & Wedding Stage Decorator',
+    title: 'Event & Wedding Decor',
     category: 'Creative & Design',
     iconName: 'Sparkles',
     defaultScope: `Transform event hall with custom floral backdrop walls, ambient LED uplighting, ceiling drapery, banquet table linens, and VIP stage furniture.`,
@@ -857,7 +857,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: '3d-printing-prototyper',
-    title: '3D Printing & Rapid Prototyper',
+    title: '3D Printing & Prototyping',
     category: 'Creative & Design',
     iconName: 'Box',
     defaultScope: `Convert 3D CAD files into physical plastic/resin prototypes using SLA/FDM 3D printing technology with post-processing support removal and painting.`,
@@ -868,7 +868,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'voiceover-artist',
-    title: 'Professional Voiceover & Audio Narrator',
+    title: 'Voiceover & Narration',
     category: 'Creative & Design',
     iconName: 'Mic',
     defaultScope: `Record professional broadcast-quality voiceover audio in broadcast studio for commercials, documentaries, or corporate training modules.`,
@@ -879,7 +879,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'package-designer',
-    title: 'Product Packaging & Dieline Designer',
+    title: 'Packaging & Print Design',
     category: 'Creative & Design',
     iconName: 'Package',
     defaultScope: `Design custom product packaging boxes, labels, pouch bags, and press-ready vector dielines for manufacturing print houses.`,
@@ -892,7 +892,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- IT, SOFTWARE & TECHNICAL SERVICES (76-85) ---
   {
     id: 'web-developer-fullstack',
-    title: 'Full-Stack Web & SaaS Developer',
+    title: 'Web & Software Development',
     category: 'IT & Software',
     iconName: 'Code',
     defaultScope: `Develop custom web application with TypeScript, React, Tailwind CSS, Express backend server, database schemas, secure user authentication, and API endpoints.`,
@@ -905,7 +905,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'mobile-app-developer',
-    title: 'iOS & Android Mobile App Developer',
+    title: 'Mobile App Development',
     category: 'IT & Software',
     iconName: 'Smartphone',
     defaultScope: `Build cross-platform React Native / Flutter mobile application with push notifications, offline storage, payment gateway integration, and App Store submission.`,
@@ -916,7 +916,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'cybersecurity-consultant',
-    title: 'Cybersecurity & Penetration Tester',
+    title: 'Cybersecurity & Auditing',
     category: 'IT & Software',
     iconName: 'ShieldAlert',
     defaultScope: `Perform vulnerability assessment and penetration testing (VAPT) on web applications, servers, and network APIs; provide executive remediation report.`,
@@ -927,7 +927,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'network-engineer',
-    title: 'Structured Network Cabling & Server Engineer',
+    title: 'Network & Server Cabling',
     category: 'IT & Software',
     iconName: 'Server',
     defaultScope: `Lay Cat6 network trunking cables, terminate patch panels, configure managed network switches, Wi-Fi access points, and install server rack cabinet.`,
@@ -939,7 +939,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'devops-cloud-architect',
-    title: 'DevOps & Cloud Infrastructure Architect',
+    title: 'Cloud & DevOps Infrastructure',
     category: 'IT & Software',
     iconName: 'Cloud',
     defaultScope: `Configure Docker containerization, Kubernetes clusters, CI/CD automated deployment pipelines, and auto-scaling cloud database clusters.`,
@@ -950,7 +950,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'seo-digital-marketer',
-    title: 'SEO Specialist & Digital Marketing Strategist',
+    title: 'SEO & Digital Marketing',
     category: 'IT & Software',
     iconName: 'TrendingUp',
     defaultScope: `Execute technical website SEO audit, keyword optimization, Google Business profile enhancement, and manage pay-per-click ad campaign across search networks.`,
@@ -961,7 +961,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'database-administrator',
-    title: 'Database Administrator & SQL Migration Specialist',
+    title: 'Database & SQL Management',
     category: 'IT & Software',
     iconName: 'Database',
     defaultScope: `Optimize SQL query performance, configure automated database backups, clean data duplicates, and execute zero-downtime data migration.`,
@@ -972,7 +972,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'e-commerce-specialist',
-    title: 'E-Commerce Store Specialist',
+    title: 'E-Commerce Store Setup',
     category: 'IT & Software',
     iconName: 'ShoppingCart',
     defaultScope: `Setup e-commerce online store with product inventory, payment gate integrations, shipping cost calculator, and abandoned cart email automation.`,
@@ -983,7 +983,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'automation-ai-developer',
-    title: 'AI & Workflow Automation Developer',
+    title: 'AI & Workflow Automation',
     category: 'IT & Software',
     iconName: 'Cpu',
     defaultScope: `Develop custom Gemini AI workflows, API integrations, automated email response bot, and business document processing automation.`,
@@ -994,7 +994,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'data-analyst',
-    title: 'Business Intelligence & Data Analyst',
+    title: 'Data Analytics & BI',
     category: 'IT & Software',
     iconName: 'BarChart',
     defaultScope: `Aggregate raw business sales data, build interactive executive PowerBI / Metabase dashboards, and produce predictive revenue forecast models.`,
@@ -1007,7 +1007,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- PERSONAL, EVENTS & FOOD SERVICES (86-95) ---
   {
     id: 'catering-chef',
-    title: 'Catering Service & Executive Chef',
+    title: 'Catering & Culinary Services',
     category: 'Food & Events',
     iconName: 'Coffee',
     defaultScope: `Provide full catering food service for event guests including gourmet multi-course buffet meals, cocktail canapés, serving staff, cutlery, and warming chaffing dishes.`,
@@ -1020,7 +1020,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'baker-cake-artist',
-    title: 'Wedding Cake Artist & Master Baker',
+    title: 'Baking & Custom Cakes',
     category: 'Food & Events',
     iconName: 'Gift',
     defaultScope: `Bake, sculpt, and decorate 4-tier luxury wedding cake with hand-crafted sugar flowers, gourmet fillings, and deliver in refrigerated transport to venue.`,
@@ -1031,7 +1031,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'hairdresser-hairstylist',
-    title: 'Master Hairstylist & Bridal Hair Specialist',
+    title: 'Hair Styling & Bridal Hair',
     category: 'Beauty & Personal',
     iconName: 'Smile',
     defaultScope: `Provide bridal hair styling, wig ventilation, custom hair coloring, extensions installation, and touch-up services for wedding party.`,
@@ -1042,7 +1042,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'barber-grooming',
-    title: 'Executive Barber & Grooming Specialist',
+    title: 'Barbering & Grooming',
     category: 'Beauty & Personal',
     iconName: 'Scissors',
     defaultScope: `Provide VIP grooming services including precision haircut, beard trimming, hot towel facial massage, hair dye, and razor line finish.`,
@@ -1053,7 +1053,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'makeup-artist',
-    title: 'Bridal & Glamour Makeup Artist (MUA)',
+    title: 'Makeup Artistry (MUA)',
     category: 'Beauty & Personal',
     iconName: 'Sparkles',
     defaultScope: `Apply HD airbrush bridal makeup, mink eyelash installation, contouring, and touch-ups throughout photoshoot event duration.`,
@@ -1064,7 +1064,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'event-planner',
-    title: 'Corporate & Wedding Event Planner',
+    title: 'Event Planning & Coordination',
     category: 'Food & Events',
     iconName: 'Calendar',
     defaultScope: `Coordinate event logistics, manage vendor contracts, oversee hall setup, manage event ushering staff, and run full event execution schedule.`,
@@ -1075,7 +1075,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'fitness-trainer',
-    title: 'Personal Fitness Trainer & Nutritionist',
+    title: 'Fitness & Personal Training',
     category: 'Beauty & Personal',
     iconName: 'Activity',
     defaultScope: `Conduct 12-week one-on-one personal fitness training sessions, body composition analysis, custom workout plans, and daily meal nutrition tracking.`,
@@ -1086,7 +1086,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'pet-groomer',
-    title: 'Professional Pet Groomer & Vet Care Assistant',
+    title: 'Pet Grooming & Care',
     category: 'Beauty & Personal',
     iconName: 'Heart',
     defaultScope: `Provide mobile pet grooming including flea bath, coat blow dry, de-shedding brushing, nail trimming, ear cleaning, and sanitary trim.`,
@@ -1097,7 +1097,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'dj-sound-entertainer',
-    title: 'Professional Event DJ & Sound System Provider',
+    title: 'DJ & Sound Entertainment',
     category: 'Food & Events',
     iconName: 'Disc',
     defaultScope: `Provide high powered active PA speakers, wireless microphones, DJ mixing console, lights, and 6 hours of custom music DJ entertainment.`,
@@ -1108,7 +1108,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'personal-shopper',
-    title: 'Personal Fashion Stylist & Shopper',
+    title: 'Fashion Styling & Shopping',
     category: 'Beauty & Personal',
     iconName: 'ShoppingBag',
     defaultScope: `Source, purchase, and deliver curated wardrobe pieces, luxury designer accessories, and outfit styling for VIP events.`,
@@ -1121,7 +1121,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   // --- PROFESSIONAL, AGRICULTURE & LOGISTICS (96-100+) ---
   {
     id: 'cleaner-commercial',
-    title: 'Commercial Cleaning & Fumigation Service',
+    title: 'Cleaning & Fumigation',
     category: 'Professional & Business',
     iconName: 'CheckCircle2',
     defaultScope: `Perform deep post-construction cleaning, floor scrubbing, glass window washing, carpet extraction, and chemical pest fumigation.`,
@@ -1132,7 +1132,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'freight-logistics',
-    title: 'Freight Forwarding & Cargo Clearing Agent',
+    title: 'Freight Forwarding & Logistics',
     category: 'Professional & Business',
     iconName: 'Truck',
     defaultScope: `Handle customs clearance, port documentation, container offloading, duty payment assessment, and bonded truck transport to destination warehouse.`,
@@ -1143,7 +1143,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'farm-manager-agronomist',
-    title: 'Agricultural Farm Manager & Agronomist',
+    title: 'Farming & Agronomy',
     category: 'Professional & Business',
     iconName: 'Sun',
     defaultScope: `Oversee land clearing, soil testing, automated drip irrigation setup, crop planting schedule, organic fertilizer application, and harvest yield management.`,
@@ -1154,7 +1154,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'security-guard-service',
-    title: 'Licensed Security Guard & Escort Contractor',
+    title: 'Security Guard Services',
     category: 'Professional & Business',
     iconName: 'Shield',
     defaultScope: `Deploy vetted, uniformed, and trained security personnel for 24/7 site surveillance, access logging, perimeter patrols, and emergency response.`,
@@ -1165,7 +1165,7 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
   },
   {
     id: 'real-estate-surveyor',
-    title: 'Land Surveyor & Property Valuer',
+    title: 'Land Surveying & Valuation',
     category: 'Professional & Business',
     iconName: 'Compass',
     defaultScope: `Conduct GPS cadastral land boundary survey, plant boundary beacon pillars, lodge official survey plan at land registry, and produce property valuation report.`,

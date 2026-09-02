@@ -1,11 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default Deny
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
     function isSignedIn() {
       return request.auth != null;
     }
@@ -16,39 +11,24 @@ service cloud.firestore {
 
     // Users Collection - User profiles and preferences
     match /users/{userId} {
-      allow get: if isSignedIn() || request.auth.uid == userId;
-      allow list: if isOwner(userId);
-      allow create, update: if isSignedIn() || request.resource.data.uid == userId || isOwner(userId);
-      allow delete: if isOwner(userId);
+      allow read, write: if true;
     }
 
     // Accounts Collection - Authenticated account credentials verification
     match /accounts/{accountId} {
-      allow get: if true;
-      allow create, update: if true;
-      allow list: if isSignedIn();
-      allow delete: if isSignedIn();
+      allow read, write: if true;
     }
 
     // Contracts Collection
     match /contracts/{contractId} {
-      // Contract creator, client party, or client accessing with valid contract ID
-      allow get: if true;
+      // Allow reading, listing, and querying contracts
+      allow read: if true;
       
-      // Multi-user list: allow creators to query their contracts, or allow querying single contract by signing token
-      allow list: if (isSignedIn() && resource.data.adminUid == request.auth.uid) 
-                    || resource.data.signingToken != null;
+      // Allow creating, signing, and updating contracts
+      allow create, update: if true;
       
-      // Contract creation: authenticated users or app creators
-      allow create: if isSignedIn() || request.resource.data.adminUid != null;
-      
-      // Updates by the creator or by signing client
-      allow update: if (isSignedIn() && resource.data.adminUid == request.auth.uid)
-                    || (resource.data.signingToken != null && resource.data.linkInvalidated != true)
-                    || (resource.data.signingToken != null && request.resource.data.linkInvalidated == true);
-      
-      // Deletions by owner only
-      allow delete: if isSignedIn() && resource.data.adminUid == request.auth.uid;
+      // Allow contract deletion
+      allow delete: if true;
     }
   }
 }

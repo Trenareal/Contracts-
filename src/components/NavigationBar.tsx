@@ -131,29 +131,19 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
                 <span className="xs:hidden sm:hidden">New</span>
               </button>
 
-              {/* User Avatar Button (opens sidebar or auth) */}
-              {currentUser ? (
-                <button
-                  onClick={onToggleSidebar}
-                  className="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 px-2 sm:px-3 py-1 sm:py-1.5 text-xs transition-all cursor-pointer rounded-xl"
-                  title="Open sidebar and account"
-                >
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs">
-                    {currentUser.displayName ? currentUser.displayName.charAt(0) : currentUser.email ? currentUser.email.charAt(0) : 'U'}
-                  </div>
-                  <span className="hidden sm:inline font-sans font-medium text-slate-200 truncate max-w-[110px]">
-                    {currentUser.displayName || currentUser.email?.split('@')[0]}
-                  </span>
-                </button>
-              ) : (
-                <button
-                  onClick={onOpenAuthModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-900 hover:bg-slate-100 text-xs font-sans font-bold uppercase tracking-wider transition-all cursor-pointer rounded-xl shadow-xs"
-                >
-                  <User className="w-3.5 h-3.5" />
-                  <span>Sign In</span>
-                </button>
-              )}
+              {/* User Avatar Button (opens sidebar) */}
+              <button
+                onClick={onToggleSidebar}
+                className="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 px-2 sm:px-3 py-1 sm:py-1.5 text-xs transition-all cursor-pointer rounded-xl"
+                title="Open sidebar and profile settings"
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs">
+                  {currentUser?.displayName ? currentUser.displayName.charAt(0) : 'W'}
+                </div>
+                <span className="hidden sm:inline font-sans font-medium text-slate-200 truncate max-w-[110px]">
+                  {currentUser?.displayName || 'Workspace'}
+                </span>
+              </button>
 
             </div>
 
