@@ -1,13 +1,15 @@
-import { ContractMaterialItem } from '../types';
+import { ContractMaterialItem, ContractType, SalaryDetails } from '../types';
 
 export interface OccupationDefinition {
   id: string;
   title: string;
   category: string;
+  contractType?: ContractType;
   iconName: string;
   defaultScope: string;
   defaultTerms: string;
   defaultMaterials: Array<Omit<ContractMaterialItem, 'id' | 'totalPrice'>>;
+  defaultSalaryDetails?: Partial<SalaryDetails>;
 }
 
 export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
@@ -1172,6 +1174,201 @@ export const OCCUPATIONS_DATABASE: OccupationDefinition[] = [
     defaultTerms: `1. BEACON RECORDING: Survey pillars lodged officially with Surveyor General's office.`,
     defaultMaterials: [
       { item: 'Concrete Boundary Beacon Pillars & Lodgement Fee', quantity: 4, quality: 'Surveyor General Certified Pillars', unitPrice: 45000 }
+    ]
+  },
+
+  // --- COMPANY & WORKER EMPLOYMENT AGREEMENTS ---
+  {
+    id: 'emp-full-time-staff',
+    title: 'Full-Time Company Employment & Salary Agreement',
+    category: 'Company & Worker Employment',
+    contractType: 'worker_employment',
+    iconName: 'Briefcase',
+    defaultScope: `1. POSITION & DUTIES: The Employee agrees to serve in the designated position, diligently performing all assigned workplace responsibilities, fulfilling company operational standards, and reporting directly to the designated department head or supervisor.
+2. WORKING HOURS: Official working hours are 8:00 AM to 5:00 PM, Monday through Friday (40 hours per week), with a one-hour lunch intermission.
+3. PERFORMANCE STANDARDS: Employee commits to maintaining professional decorum, punctuality, active teamwork, and high work quality according to established company key performance indicators (KPIs).`,
+    defaultTerms: `1. SALARY & REMUNERATION: The Company agrees to pay the Employee the agreed monthly base salary on or before the last working day of each calendar month, subject to statutory deductions (TAX, Pension, NHF where applicable).
+2. PROBATIONARY PERIOD: Employment begins with an initial 3-month probation period. Confirmation of permanent employment is subject to satisfactory performance appraisal.
+3. CONFIDENTIALITY & NON-DISCLOSURE: The Employee shall not disclose, duplicate, or misuse any proprietary company trade secrets, customer databases, pricing, financial records, or operational methods during or after employment.
+4. CODE OF CONDUCT & DISCIPLINE: Employee agrees to abide by company safety policies, anti-harassment regulations, and attendance requirements. Gross misconduct constitutes grounds for immediate summary dismissal.
+5. TERMINATION & NOTICE: Following probation, either party may terminate this agreement by providing 30 days written notice or by paying one month base salary in lieu of notice.
+6. INTELLECTUAL PROPERTY: All works, systems, code, designs, and materials created by the Employee during working hours or using company resources remain the exclusive property of the Company.`,
+    defaultMaterials: [],
+    defaultSalaryDetails: {
+      baseSalary: 180000,
+      paymentFrequency: 'monthly',
+      employmentType: 'full_time',
+      jobTitle: 'Operations & Administrative Specialist',
+      department: 'General Operations',
+      probationPeriod: '3 Months',
+      workingHours: 'Mon - Fri, 8:00 AM - 5:00 PM (40 hrs/wk)',
+      allowances: 'Transport subsidy + Group health coverage',
+      leaveDays: '21 Days Paid Annual Leave',
+      noticePeriod: '30 Days Written Notice'
+    }
+  },
+  {
+    id: 'emp-factory-workshop-worker',
+    title: 'Factory & Workshop Worker Employment Contract',
+    category: 'Company & Worker Employment',
+    contractType: 'worker_employment',
+    iconName: 'Wrench',
+    defaultScope: `1. WORKSHOP DUTIES: Execute fabrication, assembly line duties, machine operation, safety protocol adherence, raw material handling, and daily production batch quota fulfillment.
+2. SHIFTS & SCHEDULE: Standard workshop shift hours: 7:30 AM to 4:30 PM (Monday to Friday, Saturday alternate half-day).
+3. SAFETY COMPLIANCE: Obligatory usage of company-provided Personal Protective Equipment (PPE) including safety boots, goggles, gloves, and ear protection at all times on the workshop floor.`,
+    defaultTerms: `1. WAGE & OVERTIME TERMS: The Worker shall receive the designated monthly wage disbursed monthly. Approved overtime hours worked beyond 40 hours per week are compensated at 1.5x the standard hourly wage rate.
+2. TOOL & MACHINE CARE: Worker is accountable for proper care, clean storage, and immediate defect reporting of assigned workshop machinery and precision tools.
+3. SAFETY & ZERO-TOLERANCE: Operating machinery under the influence of alcohol, drugs, or without required safety gear results in immediate suspension.
+4. PROBATION & NOTICE: 1-month probation. 14 days written notice required for termination by either party.
+5. WORKPLACE INJURY & FIRST AID: Employer provides on-site first aid facilities and statutory workmen's compensation insurance for on-the-job incidents.`,
+    defaultMaterials: [],
+    defaultSalaryDetails: {
+      baseSalary: 120000,
+      paymentFrequency: 'monthly',
+      employmentType: 'full_time',
+      jobTitle: 'Senior Workshop Craftsman / Machine Operator',
+      department: 'Production & Fabrication',
+      probationPeriod: '1 Month',
+      workingHours: 'Mon - Fri, 7:30 AM - 4:30 PM (40 hrs/wk)',
+      allowances: 'Safety hazard allowance + Overtime rate 1.5x',
+      leaveDays: '15 Days Annual Leave',
+      noticePeriod: '14 Days Written Notice'
+    }
+  },
+  {
+    id: 'emp-sales-marketing-executive',
+    title: 'Sales Executive & Commission Agreement',
+    category: 'Company & Worker Employment',
+    contractType: 'worker_employment',
+    iconName: 'TrendingUp',
+    defaultScope: `1. SALES RESPONSIBILITIES: Proactively prospect commercial leads, conduct product demonstrations, negotiate client contracts, achieve monthly sales quotas, and maintain accurate CRM client records.
+2. TERRITORY & REPORTING: Assigned territory coverage with weekly pipeline reviews submitted to the Head of Sales.`,
+    defaultTerms: `1. BASE SALARY + COMMISSION: Company pays a fixed monthly base salary plus a 5% to 10% commission on all cleared invoice revenues generated by the Executive.
+2. COMMISSION DISBURSEMENT: Commissions are calculated on the 1st of each month and paid alongside regular salary once client payments have cleared the bank.
+3. CLIENT NON-SOLICITATION: For 12 months following departure from the company, the Executive shall not solicit or divert any company clients, accounts, or leads.
+4. EXPENSE REIMBURSEMENT: Approved business travel, client entertainment, and logistics costs reimbursed upon submission of official receipts.`,
+    defaultMaterials: [],
+    defaultSalaryDetails: {
+      baseSalary: 150000,
+      paymentFrequency: 'monthly',
+      employmentType: 'full_time',
+      jobTitle: 'Commercial Sales Executive',
+      department: 'Business Development & Sales',
+      probationPeriod: '3 Months',
+      workingHours: 'Mon - Fri, 8:30 AM - 5:00 PM',
+      allowances: 'Transport logistics stipend + 7.5% Closed Sales Commission',
+      leaveDays: '20 Days Annual Leave',
+      noticePeriod: '30 Days Written Notice'
+    }
+  },
+  {
+    id: 'emp-driver-logistics-officer',
+    title: 'Company Driver & Fleet Logistics Staff Agreement',
+    category: 'Company & Worker Employment',
+    contractType: 'worker_employment',
+    iconName: 'Truck',
+    defaultScope: `1. DRIVING DUTIES: Safe transport of company personnel, client goods, inventory deliveries, and VIP pickups using assigned company vehicles.
+2. VEHICLE INSPECTION: Daily pre-trip inspection of vehicle fluids (engine oil, coolant, brake fluid), tire pressure, battery, and bodywork cleanliness.
+3. LOGBOOK RECORDING: Accurate recording of daily trip mileage, fuel purchase receipts, and delivery manifest signatures.`,
+    defaultTerms: `1. SALARY & FUEL ADVANCE: Monthly salary paid on the 28th of every month. Company provides dedicated fuel credit card or approved weekly fuel disbursements.
+2. TRAFFIC LAWS & FINES: Driver must maintain a valid commercial driving license. Traffic violations and fines caused by reckless driving or illegal parking are the personal liability of the driver.
+3. VEHICLE CARE & NO UNAUTHORIZED USE: Company vehicles may not be used for personal errands or unauthorized third-party ride-hailing services.
+4. NOTICE & TERMINATION: 14 days written notice for resignation or termination.`,
+    defaultMaterials: [],
+    defaultSalaryDetails: {
+      baseSalary: 110000,
+      paymentFrequency: 'monthly',
+      employmentType: 'full_time',
+      jobTitle: 'Corporate Fleet Driver & Logistics Officer',
+      department: 'Logistics & Transport',
+      probationPeriod: '1 Month',
+      workingHours: 'Mon - Sat, 7:00 AM - 6:00 PM',
+      allowances: 'Out-of-station trip allowance + Overtime bonus',
+      leaveDays: '14 Days Annual Leave',
+      noticePeriod: '14 Days Written Notice'
+    }
+  },
+  {
+    id: 'emp-security-guard-contract',
+    title: 'Security Personnel & Facility Guard Agreement',
+    category: 'Company & Worker Employment',
+    contractType: 'worker_employment',
+    iconName: 'Shield',
+    defaultScope: `1. SECURITY DUTIES: Continuous access control, visitor identification logging, vehicle searching, CCTV monitor surveillance, and perimeter physical inspection.
+2. INCIDENT REPORTING: Immediate logging and supervisor notification of any suspicious activities, unauthorized trespass, or safety hazards.`,
+    defaultTerms: `1. SALARY DISBURSEMENT: Guaranteed monthly remuneration disbursed monthly without unauthorized deductions.
+2. POST DISCIPLINE: Leaving security post unattended or sleeping on duty constitutes severe breach subject to instant termination.
+3. UNIFORM & EQUIPMENT: Company issues 2 sets of uniforms, flashlight, communication radio, and baton. Items must be returned in good condition upon separation.`,
+    defaultMaterials: [],
+    defaultSalaryDetails: {
+      baseSalary: 95000,
+      paymentFrequency: 'monthly',
+      employmentType: 'full_time',
+      jobTitle: 'Facility Security Officer',
+      department: 'Corporate Security',
+      probationPeriod: '1 Month',
+      workingHours: '12-Hour Rotating Shift Schedule (Day/Night)',
+      allowances: 'Night shift allowance + Uniform maintenance allowance',
+      leaveDays: '14 Days Annual Leave',
+      noticePeriod: '14 Days Written Notice'
+    }
+  },
+  {
+    id: 'emp-apprentice-trainee-stipend',
+    title: 'Apprenticeship & Trainee Stipend Agreement',
+    category: 'Company & Worker Employment',
+    contractType: 'worker_employment',
+    iconName: 'GraduationCap',
+    defaultScope: `1. APPRENTICESHIP TRAINING: Undergo structured vocational training, mastering practical workshop trade skills under the direct mentorship of senior master craftsmen.
+2. PRACTICAL PARTICIPATION: Assist with workshop setup, measuring, tooling, basic fabrication, and workshop tidiness.`,
+    defaultTerms: `1. MONTHLY LEARNING STIPEND: Company provides a monthly training stipend to support transport and living upkeep.
+2. DURATION & CERTIFICATION: Program duration is 12 months. Upon successful completion and skill assessment, the Company will award a Master Artisan Certificate of Competence.
+3. DEDICATION & PUNCTUALITY: Trainee agrees to attend daily training sessions with dedication and respect for workshop health and safety protocols.`,
+    defaultMaterials: [],
+    defaultSalaryDetails: {
+      baseSalary: 60000,
+      paymentFrequency: 'monthly',
+      employmentType: 'apprentice',
+      jobTitle: 'Vocational Trade Apprentice / Trainee',
+      department: 'Artisan Workshop Training',
+      probationPeriod: '1 Month',
+      workingHours: 'Mon - Fri, 8:30 AM - 4:30 PM',
+      allowances: 'Monthly transport stipend + Certificate of Completion',
+      leaveDays: '10 Days Training Break',
+      noticePeriod: '7 Days Written Notice'
+    }
+  },
+
+  // --- CORPORATE & B2B COMMERCIAL CONTRACTS ---
+  {
+    id: 'biz-vendor-supply-contract',
+    title: 'Corporate Vendor & Commercial Supply Agreement',
+    category: 'Corporate B2B Contracts',
+    contractType: 'business',
+    iconName: 'Building',
+    defaultScope: `1. SUPPLY SPECIFICATIONS: Supplier agrees to supply and deliver high-grade industrial materials, office supplies, or commercial equipment meeting agreed technical specifications and batch volumes.
+2. DELIVERY SCHEDULE: Shipments delivered to Buyer designated warehouse on or before scheduled delivery dates with accompanying waybills and quality inspection certificates.`,
+    defaultTerms: `1. COMMERCIAL PRICING & INVOICING: Buyer agrees to settle verified supplier invoices within Net-30 days of goods delivery and warehouse inspection sign-off.
+2. DEFECTIVE GOODS & REJECTION: Buyer reserves the right to reject non-conforming or damaged batches within 7 business days. Supplier must replace defective items within 5 business days at supplier expense.
+3. PRICE STABILITY: Agreed unit prices remain fixed for the duration of this purchase agreement without unilateral price escalations.
+4. FORCE MAJEURE: Neither party is liable for delivery delays resulting from acts of God, port embargoes, or government trade restrictions.`,
+    defaultMaterials: [
+      { item: 'Bulk Commercial Supply Order Batch A', quantity: 1, quality: 'ISO 9001 Certified Commercial Grade Supplies', unitPrice: 850000 }
+    ]
+  },
+  {
+    id: 'biz-service-level-agreement',
+    title: 'Corporate Service Level Agreement (SLA) & Retainer',
+    category: 'Corporate B2B Contracts',
+    contractType: 'business',
+    iconName: 'ShieldCheck',
+    defaultScope: `1. SCOPE OF SERVICES: Provider agrees to deliver 24/7 technical system maintenance, scheduled preventative servicing, cloud infrastructure monitoring, and priority emergency troubleshooting for Client company facilities.
+2. RESPONSE TIME GUARANTEE: Critical system outages acknowledged within 30 minutes and on-site/remote remediation initiated within 2 hours.`,
+    defaultTerms: `1. MONTHLY CORPORATE RETAINER: Client pays an agreed monthly retainer fee payable in advance at the start of each service cycle.
+2. PENALTY FOR SLA DOWNTIME: If response times exceed 4 hours without justification, a 5% credit is deducted from the subsequent month billing.
+3. CONFIDENTIALITY: Both corporations agree to strict non-disclosure regarding internal IT infrastructure and proprietary business workflows.`,
+    defaultMaterials: [
+      { item: 'Monthly Corporate IT & Engineering Maintenance Retainer', quantity: 1, quality: 'Tier-1 SLA Priority Corporate Support Package', unitPrice: 350000 }
     ]
   }
 ];

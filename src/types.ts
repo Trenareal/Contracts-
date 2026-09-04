@@ -1,4 +1,27 @@
 export type ContractStatus = 'draft' | 'pending_signature' | 'completed' | 'invalidated';
+export type ContractType = 'business' | 'worker_employment';
+
+export interface UserBusinessProfile {
+  businessName?: string;
+  professionalTitle?: string;
+  phone?: string;
+  address?: string;
+  email?: string;
+}
+
+export interface SalaryDetails {
+  baseSalary: number;
+  paymentFrequency: 'monthly' | 'weekly' | 'biweekly' | 'bi_weekly' | 'hourly' | 'annual';
+  employmentType?: 'full_time' | 'part_time' | 'contract' | 'probation' | 'probationary' | 'apprentice';
+  jobTitle?: string;
+  department?: string;
+  probationPeriod?: string; // e.g., "3 Months", "6 Months", "None"
+  workingHours?: string;    // e.g., "Mon - Fri, 8:00 AM - 5:00 PM (40 hrs/wk)"
+  allowances?: string;      // e.g., "Transport allowance, Medical cover, Lunch subsidy"
+  performanceBonus?: string;
+  leaveDays?: string;       // e.g., "21 days paid annual leave"
+  noticePeriod?: string;    // e.g., "30 days written notice"
+}
 
 export interface AuthUser {
   uid: string;
@@ -48,6 +71,8 @@ export interface Contract {
   signingToken: string;
   title: string;
   category: string;
+  contractType?: ContractType;
+  salaryDetails?: SalaryDetails;
   occupation?: string; // e.g., "Custom Tailor & Fashion Designer", "Structural Welder"
   description: string;
   termsAndConditions: string;
@@ -82,6 +107,8 @@ export interface CreateContractPayload {
   adminUid?: string;
   title: string;
   category: string;
+  contractType?: ContractType;
+  salaryDetails?: SalaryDetails;
   occupation?: string;
   description: string;
   termsAndConditions: string;

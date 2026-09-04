@@ -1,28 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Contract, CreateContractPayload, AuthUser } from './types';
+import { Contract, CreateContractPayload, AuthUser, ContractType } from './types';
 import { ClientSigningPortal } from './components/ClientSigningPortal';
 import { ContractForm } from './components/ContractForm';
 import { ContractReadyView } from './components/ContractReadyView';
 import { BlankStarterPage } from './components/BlankStarterPage';
+import { AdminDashboard } from './components/AdminDashboard';
 import { detectDefaultLanguage, SUPPORTED_LANGUAGES } from './utils/i18n';
 import { CURRENCY_LIST } from './utils/formatters';
 import { 
   createContractInFirebase, 
   getContractByIdOrToken,
+  subscribeContracts,
+  subscribeToSingleContract,
+  completeContractInFirebase,
+  invalidateContractLinkInFirebase,
+  deleteContractFromFirebase,
+  updateContractInFirebase,
+  getOrCreateBrowserUser
 } from './lib/firebaseService';
-import { Loader2, Plus, ArrowLeft, Globe, DollarSign } from 'lucide-react';
-
-const DEFAULT_USER: AuthUser = {
-  uid: 'workspace_user',
-  displayName: 'Contract Drafter',
-  email: 'admin@contracts.local',
-};
+import { Loader2, Plus, ArrowLeft, Globe, DollarSign, FileText, CheckCircle2, LayoutDashboard } from 'lucide-react';
 
 export default function App() {
+  const [currentUser] = useState<AuthUser>(() => getOrCreateBrowserUser());
   const [loading, setLoading] = useState(true);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [activeClientContract, setActiveClientContract] = useState<Contract | null>(null);
   const [justCreatedContract, setJustCreatedContract] = useState<Contract | null>(null);
-  const [isDrafting, setIsDrafting] = useState(false);
+  const [isDrafting, setIsDrafting] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('contract_app_is_drafting') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [draftOptions, setDraftOptions] = useState<{ contractType?: ContractType; occupationId?: string } | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   // Global Currency & Language Preferences
   const [selectedCurrency, setSelectedCurrency] = useState<string>('NGN');
@@ -33,7 +45,25 @@ export default function App() {
     setSelectedLanguage(detectDefaultLanguage());
   }, []);
 
-  // Check URL params for client signing route (?token=... or ?contract=...)
+  // Subscribe to all contracts in real-time for THIS isolated browser user only
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+    const unsubscribe = subscribeContracts(currentUser.uid, (freshList) => {
+      setContracts(freshList);
+    });
+    return () => unsubscribe();
+  }, [currentUser?.uid]);
+
+  // If a created contract is active, subscribe to its real-time updates as well
+  useEffect(() => {
+    if (!justCreatedContract?.id) return;
+    const unsubscribe = subscribeToSingleContract(justCreatedContract.id, (fresh) => {
+      setJustCreatedContract(fresh);
+    });
+    return () => unsubscribe();
+  }, [justCreatedContract?.id]);
+
+  // Check URL params for client signing route, OR restore active in-progress contract/draft on page refresh
   useEffect(() => {
     const checkTokenRoute = async () => {
       try {
@@ -43,10 +73,31 @@ export default function App() {
           const clientContract = await getContractByIdOrToken(token, true);
           if (clientContract) {
             setActiveClientContract(clientContract);
+            setLoading(false);
+            return;
           }
         }
+
+        // Accidental page refresh protection: restore active published contract if user is still on this tab
+        const savedCreatedId = sessionStorage.getItem('contract_app_active_created_id');
+        if (savedCreatedId) {
+          const savedContract = await getContractByIdOrToken(savedCreatedId);
+          if (savedContract) {
+            setJustCreatedContract(savedContract);
+            setShowDashboard(false);
+            setIsDrafting(false);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Accidental page refresh protection: restore active drafting mode if user was drafting
+        const wasDrafting = sessionStorage.getItem('contract_app_is_drafting') === 'true' || !!sessionStorage.getItem('contract_app_active_draft');
+        if (wasDrafting) {
+          setIsDrafting(true);
+        }
       } catch (err) {
-        console.error('Error checking contract token:', err);
+        console.error('Error checking contract token/draft recovery:', err);
       } finally {
         setLoading(false);
       }
@@ -63,8 +114,15 @@ export default function App() {
         language: payload.language || selectedLanguage,
       };
 
-      const created = await createContractInFirebase(fullPayload, DEFAULT_USER.uid);
+      const created = await createContractInFirebase(fullPayload, currentUser.uid);
       setJustCreatedContract(created);
+      try {
+        sessionStorage.setItem('contract_app_active_created_id', created.id);
+        sessionStorage.removeItem('contract_app_active_draft');
+        sessionStorage.removeItem('contract_app_is_drafting');
+      } catch {}
+      setShowDashboard(false);
+      setIsDrafting(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       console.error('Failed to create contract:', err);
@@ -72,13 +130,62 @@ export default function App() {
     }
   };
 
+  const handleUpdateContract = async (contractId: string, payload: CreateContractPayload) => {
+    try {
+      await updateContractInFirebase(contractId, payload);
+    } catch (err: any) {
+      console.error('Failed to update contract:', err);
+      alert(err?.message || 'Failed to update contract.');
+    }
+  };
+
+  const handleCompleteContract = async (contractId: string) => {
+    try {
+      await completeContractInFirebase(contractId);
+    } catch (err: any) {
+      console.error('Failed to complete contract:', err);
+      alert(err?.message || 'Failed to complete contract.');
+    }
+  };
+
+  const handleInvalidateLink = async (contractId: string) => {
+    try {
+      await invalidateContractLinkInFirebase(contractId);
+    } catch (err: any) {
+      console.error('Failed to invalidate link:', err);
+      alert(err?.message || 'Failed to revoke link.');
+    }
+  };
+
+  const handleDeleteContract = async (contractId: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this contract?')) return;
+    try {
+      await deleteContractFromFirebase(contractId);
+      if (justCreatedContract?.id === contractId) {
+        handleDraftNew();
+      }
+    } catch (err: any) {
+      console.error('Failed to delete contract:', err);
+      alert(err?.message || 'Failed to delete contract.');
+    }
+  };
+
   const handleDraftNew = () => {
+    try {
+      sessionStorage.removeItem('contract_app_active_created_id');
+      sessionStorage.removeItem('contract_app_active_draft');
+      sessionStorage.removeItem('contract_app_is_drafting');
+    } catch {}
+    setDraftOptions(null);
     setJustCreatedContract(null);
     setActiveClientContract(null);
+    setShowDashboard(false);
     setIsDrafting(false);
     window.history.pushState({}, '', window.location.pathname);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const completedContractsCount = contracts.filter(c => c.status === 'completed').length;
 
   if (loading) {
     return (
@@ -109,7 +216,7 @@ export default function App() {
     );
   }
 
-  // 2. Main Flow: Blank Starter Page -> Contract Drafter -> Share Hub
+  // 2. Main Flow: Blank Starter Page -> Contract Drafter -> Share Hub / Dashboard
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       
@@ -133,6 +240,47 @@ export default function App() {
                 E-Sign
               </span>
             </div>
+          </div>
+
+          {/* Center / Navigation items */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => {
+                setShowDashboard(false);
+                setIsDrafting(false);
+                setJustCreatedContract(null);
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                !showDashboard && !isDrafting && !justCreatedContract
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              Draft Contract
+            </button>
+
+            {contracts.length > 0 && (
+              <button
+                onClick={() => {
+                  setShowDashboard(true);
+                  setIsDrafting(false);
+                  setJustCreatedContract(null);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  showDashboard
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5 text-blue-400" />
+                <span>Drafted Contracts ({contracts.length})</span>
+                {completedContractsCount > 0 && (
+                  <span className="px-1.5 py-0.2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold rounded-full">
+                    {completedContractsCount} signed
+                  </span>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Quick Header Controls */}
@@ -196,7 +344,20 @@ export default function App() {
 
       {/* Main Page Area */}
       <main className="flex-1 w-full pb-16">
-        {justCreatedContract ? (
+        {showDashboard ? (
+          <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-6">
+            <AdminDashboard
+              contracts={contracts}
+              user={currentUser}
+              onCreateContract={handleCreateContract}
+              onUpdateContract={handleUpdateContract}
+              onCompleteContract={handleCompleteContract}
+              onInvalidateLink={handleInvalidateLink}
+              onDeleteContract={handleDeleteContract}
+              onOpenClientPortal={(c) => setActiveClientContract(c)}
+            />
+          </div>
+        ) : justCreatedContract ? (
           <ContractReadyView
             contract={justCreatedContract}
             onOpenSigningPortal={(c) => setActiveClientContract(c)}
@@ -208,12 +369,20 @@ export default function App() {
               isStandalone={true}
               defaultCurrency={selectedCurrency}
               defaultLanguage={selectedLanguage}
+              initialContractType={draftOptions?.contractType}
+              initialOccupationId={draftOptions?.occupationId}
               onSave={handleCreateContract}
               onCancel={() => setIsDrafting(false)}
             />
           </div>
         ) : (
-          <BlankStarterPage onStartDrafting={() => setIsDrafting(true)} />
+          <BlankStarterPage 
+            onStartDrafting={(opts) => {
+              setDraftOptions(opts || null);
+              setShowDashboard(false);
+              setIsDrafting(true);
+            }} 
+          />
         )}
       </main>
 

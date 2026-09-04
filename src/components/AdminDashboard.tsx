@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Contract, CreateContractPayload } from '../types';
 import { ContractForm } from './ContractForm';
+import { InPersonSigningModal } from './InPersonSigningModal';
 import { generateContractPDF } from '../utils/pdfGenerator';
 import { formatCurrency } from '../utils/formatters';
 import { OccupationDefinition } from '../data/occupations';
@@ -9,7 +10,7 @@ import {
   FileText, Plus, Copy, ExternalLink, Download, Ban, Trash2, 
   Search, ShieldCheck, DollarSign, Clock, CheckCircle2, AlertCircle,
   FileCheck, RefreshCw, Eye, Sparkles, Lock, ArrowUpRight, Edit3, User, LogOut, LogIn, Briefcase,
-  MoreVertical, X, Check, ArrowRight, Building
+  MoreVertical, X, Check, ArrowRight, Building, UserCheck
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -50,6 +51,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [selectedAuditContract, setSelectedAuditContract] = useState<Contract | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [mobileActionContract, setMobileActionContract] = useState<Contract | null>(null);
+  const [inPersonSigningContract, setInPersonSigningContract] = useState<Contract | null>(null);
 
   // Metrics
   const totalValue = contracts.reduce((acc, c) => acc + c.totalCost, 0);
@@ -450,6 +452,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </span>
                     )}
 
+                    {/* In-Person Client Direct Sign (If not signed yet) */}
+                    {!isCompleted && !contract.clientParty?.signedAt && !isLinkInvalid && (
+                      <button
+                        onClick={() => setInPersonSigningContract(contract)}
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95"
+                        title="Client is in-person: Sign on this screen now"
+                      >
+                        <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Sign In-Person</span>
+                      </button>
+                    )}
+
                     {/* Client Portal Preview */}
                     <button
                       onClick={() => onOpenClientPortal(contract)}
@@ -565,6 +579,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <div className="space-y-2 font-sans text-xs">
               
+              {/* In-Person Client Direct Sign (If not completed & not signed) */}
+              {!mobileActionContract.status.includes('completed') && !mobileActionContract.clientParty?.signedAt && !mobileActionContract.linkInvalidated && (
+                <button
+                  onClick={() => {
+                    const c = mobileActionContract;
+                    setMobileActionContract(null);
+                    setInPersonSigningContract(c);
+                  }}
+                  className="w-full flex items-center gap-3 p-3.5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-white font-bold cursor-pointer shadow-sm"
+                >
+                  <UserCheck className="w-4 h-4 text-white" />
+                  <span>Client Sign In-Person Now</span>
+                </button>
+              )}
+
               {/* Mark as Completed */}
               {!mobileActionContract.status.includes('completed') ? (
                 <button
@@ -733,6 +762,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* In-Person Direct Signing Modal */}
+      {inPersonSigningContract && (
+        <InPersonSigningModal
+          contract={inPersonSigningContract}
+          onSuccess={(updated) => {
+            setInPersonSigningContract(null);
+          }}
+          onClose={() => setInPersonSigningContract(null)}
+        />
       )}
 
     </div>

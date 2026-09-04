@@ -12,11 +12,45 @@ import {
   Unsubscribe 
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
-import { Contract, CreateContractPayload, SignContractPayload } from '../types';
+import { Contract, CreateContractPayload, SignContractPayload, AuthUser } from '../types';
 
 export const CONTRACTS_COLLECTION = 'contracts';
 export const USERS_COLLECTION = 'users';
 export const ACCOUNTS_COLLECTION = 'accounts';
+
+/**
+ * Get or create unique isolated browser user identity
+ */
+export function getOrCreateBrowserUser(): AuthUser {
+  try {
+    const saved = localStorage.getItem('contract_app_current_user');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.uid) {
+        return parsed;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // Generate a unique per-device/browser isolated workspace UID
+  const randomSuffix = Math.random().toString(36).substring(2, 9);
+  const newUid = `user_${Date.now()}_${randomSuffix}`;
+  const newUser: AuthUser = {
+    uid: newUid,
+    displayName: 'Contract Drafter',
+    email: 'drafter@contracts.app',
+  };
+
+  try {
+    localStorage.setItem('contract_app_current_user', JSON.stringify(newUser));
+  } catch {
+    // ignore
+  }
+
+  return newUser;
+}
 
 /**
  * SHA-256 Password Hash for Secure Database Matching
@@ -175,9 +209,143 @@ export async function saveUserProfileToFirestore(uid: string, data: {
   }
 }
 
+export function broadcastContractUpdate(updatedContract: Contract) {
+  try {
+    localStorage.setItem(`contract_item_${updatedContract.id}`, JSON.stringify(updatedContract));
+    localStorage.setItem(`contract_item_${updatedContract.signingToken}`, JSON.stringify(updatedContract));
+    
+    // Update contract in user list caches
+    const uid = updatedContract.adminUid || 'workspace_user';
+    const cachedListStr = localStorage.getItem(`contract_app_contracts_${uid}`);
+    const cachedList: Contract[] = cachedListStr ? JSON.parse(cachedListStr) : [];
+    const newIdx = cachedList.findIndex(c => c.id === updatedContract.id);
+    let updatedList: Contract[];
+    if (newIdx >= 0) {
+      updatedList = [...cachedList];
+      updatedList[newIdx] = updatedContract;
+    } else {
+      updatedList = [updatedContract, ...cachedList];
+    }
+    localStorage.setItem(`contract_app_contracts_${uid}`, JSON.stringify(updatedList));
+
+    // Also update workspace_user cache if different
+    if (uid !== 'workspace_user') {
+      const defStr = localStorage.getItem('contract_app_contracts_workspace_user');
+      const defArr: Contract[] = defStr ? JSON.parse(defStr) : [];
+      const dIdx = defArr.findIndex(c => c.id === updatedContract.id);
+      if (dIdx >= 0) {
+        defArr[dIdx] = updatedContract;
+        localStorage.setItem('contract_app_contracts_workspace_user', JSON.stringify(defArr));
+      }
+    }
+
+    // Cross-tab broadcast channel
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel('contract_sync_channel');
+      channel.postMessage({ type: 'CONTRACT_UPDATED', contract: updatedContract });
+      channel.close();
+    }
+    // Window custom event
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('contract_updated', { detail: updatedContract }));
+    }
+  } catch (err) {
+    console.warn('Broadcast sync error:', err);
+  }
+}
+
 /**
- * Real-time listener for contracts collection in Firestore scoped to the current user's UID.
+ * Subscribe to real-time changes of a single contract (via Firestore onSnapshot + instant cross-tab sync)
  */
+export function subscribeToSingleContract(
+  idOrToken: string, 
+  onUpdate: (contract: Contract) => void
+): Unsubscribe {
+  let isUnsubscribed = false;
+
+  // 1. Instant cache retrieval
+  getContractByIdOrToken(idOrToken).then((cached) => {
+    if (cached && !isUnsubscribed) {
+      onUpdate(cached);
+    }
+  });
+
+  // 2. BroadcastChannel listener (Instant cross-tab updates on same browser / machine)
+  let broadcastChannel: BroadcastChannel | null = null;
+  if (typeof BroadcastChannel !== 'undefined') {
+    broadcastChannel = new BroadcastChannel('contract_sync_channel');
+    broadcastChannel.onmessage = (event) => {
+      if (isUnsubscribed) return;
+      if (event.data?.type === 'CONTRACT_UPDATED' && event.data?.contract) {
+        const c: Contract = event.data.contract;
+        if (c.id === idOrToken || c.signingToken === idOrToken) {
+          onUpdate(c);
+        }
+      }
+    };
+  }
+
+  // 3. Custom event listener (in-app components)
+  const handleCustomEvent = (e: any) => {
+    if (isUnsubscribed) return;
+    if (e.detail && (e.detail.id === idOrToken || e.detail.signingToken === idOrToken)) {
+      onUpdate(e.detail);
+    }
+  };
+  window.addEventListener('contract_updated', handleCustomEvent);
+
+  // 4. Storage event listener (standard browser cross-tab)
+  const handleStorageEvent = (e: StorageEvent) => {
+    if (isUnsubscribed) return;
+    if ((e.key === `contract_item_${idOrToken}` || e.key?.startsWith('contract_item_')) && e.newValue) {
+      try {
+        const parsed: Contract = JSON.parse(e.newValue);
+        if (parsed && (parsed.id === idOrToken || parsed.signingToken === idOrToken)) {
+          onUpdate(parsed);
+        }
+      } catch {}
+    }
+  };
+  window.addEventListener('storage', handleStorageEvent);
+
+  // 5. Firestore Document onSnapshot listener (real-time cloud database sync)
+  let firestoreUnsub: Unsubscribe = () => {};
+
+  getContractByIdOrToken(idOrToken).then((resolved) => {
+    if (isUnsubscribed) return;
+    const targetId = resolved?.id || idOrToken;
+    const docRef = doc(db, CONTRACTS_COLLECTION, targetId);
+
+    try {
+      firestoreUnsub = onSnapshot(
+        docRef,
+        (docSnap) => {
+          if (isUnsubscribed) return;
+          if (docSnap.exists()) {
+            const fresh = docSnap.data() as Contract;
+            onUpdate(fresh);
+            broadcastContractUpdate(fresh);
+          }
+        },
+        (err) => {
+          handleFirestoreError(err, OperationType.GET, `${CONTRACTS_COLLECTION}/${targetId}`);
+        }
+      );
+    } catch (subErr) {
+      console.warn('Firestore subscription fallback:', subErr);
+    }
+  });
+
+  return () => {
+    isUnsubscribed = true;
+    if (broadcastChannel) {
+      broadcastChannel.close();
+    }
+    window.removeEventListener('contract_updated', handleCustomEvent);
+    window.removeEventListener('storage', handleStorageEvent);
+    firestoreUnsub();
+  };
+}
 export function subscribeContracts(userUid: string, onUpdate: (contracts: Contract[]) => void): Unsubscribe {
   if (!userUid) {
     onUpdate([]);
@@ -394,6 +562,7 @@ export async function createContractInFirebase(payload: CreateContractPayload, u
     console.warn('Local storage error:', storageErr);
   }
 
+  broadcastContractUpdate(newContract);
   try {
     await setDoc(doc(db, CONTRACTS_COLLECTION, id), newContract);
     return newContract;
@@ -446,12 +615,15 @@ export async function signContractInFirebase(idOrToken: string, payload: SignCon
     ],
   };
 
+  // Broadcast instantly to all tabs, windows, and caches
+  broadcastContractUpdate(updatedContract);
+
   try {
     await setDoc(doc(db, CONTRACTS_COLLECTION, contract.id), updatedContract);
     return updatedContract;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${CONTRACTS_COLLECTION}/${contract.id}`);
-    throw error;
+    return updatedContract;
   }
 }
 
@@ -484,12 +656,14 @@ export async function invalidateContractLinkInFirebase(contractId: string): Prom
     ],
   };
 
+  broadcastContractUpdate(updatedContract);
+
   try {
     await setDoc(docRef, updatedContract);
     return updatedContract;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${CONTRACTS_COLLECTION}/${contractId}`);
-    throw error;
+    return updatedContract;
   }
 }
 
@@ -523,12 +697,14 @@ export async function completeContractInFirebase(contractId: string): Promise<Co
     ],
   };
 
+  broadcastContractUpdate(updatedContract);
+
   try {
     await setDoc(docRef, updatedContract);
     return updatedContract;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${CONTRACTS_COLLECTION}/${contractId}`);
-    throw error;
+    return updatedContract;
   }
 }
 
@@ -596,12 +772,14 @@ export async function updateContractInFirebase(contractId: string, payload: Part
     ],
   };
 
+  broadcastContractUpdate(updatedContract);
+
   try {
     await setDoc(docRef, updatedContract);
     return updatedContract;
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${CONTRACTS_COLLECTION}/${contractId}`);
-    throw error;
+    return updatedContract;
   }
 }
 
