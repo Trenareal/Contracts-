@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Contract, 
   CreateContractPayload, 
@@ -13,7 +13,7 @@ import { MaterialsTable } from './MaterialsTable';
 import { ImageUploader } from './ImageUploader';
 import { AutoExpandingTextarea } from './AutoExpandingTextarea';
 import { ContractProofreadView } from './ContractProofreadView';
-import { ContractSidebarToggle, SectionKey } from './ContractSidebarToggle';
+import { SectionKey } from './ContractSidebarToggle';
 import { generateContractPDF } from '../utils/pdfGenerator';
 import { OCCUPATIONS_DATABASE, OccupationDefinition } from '../data/occupations';
 import { CURRENCY_LIST, formatCurrency } from '../utils/formatters';
@@ -44,7 +44,10 @@ import {
   Clock,
   Award,
   Wallet,
-  BadgeCheck
+  BadgeCheck,
+  PanelLeft,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface ContractFormProps {
@@ -53,6 +56,8 @@ interface ContractFormProps {
   isStandalone?: boolean;
   initialContract?: Contract | null;
   initialContractType?: ContractType;
+  activeContractType?: ContractType;
+  onContractTypeChange?: (type: ContractType) => void;
   initialOccupationId?: string;
   isEditing?: boolean;
   defaultOccupation?: OccupationDefinition | null;
@@ -60,6 +65,9 @@ interface ContractFormProps {
   defaultAdminParty?: Partial<PartyDetails> | null;
   defaultCurrency?: string;
   defaultLanguage?: string;
+  externalActiveSection?: SectionKey | 'proofread' | null;
+  onSectionChange?: (sec: SectionKey) => void;
+  onOpenSidebar?: () => void;
 }
 
 const DRAFT_STORAGE_KEY = 'contract_app_active_draft';
@@ -80,6 +88,8 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   isStandalone = false,
   initialContract,
   initialContractType,
+  activeContractType,
+  onContractTypeChange,
   initialOccupationId,
   isEditing,
   defaultOccupation,
@@ -87,12 +97,16 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   defaultAdminParty,
   defaultCurrency = 'NGN',
   defaultLanguage = 'en',
+  externalActiveSection,
+  onSectionChange,
+  onOpenSidebar,
 }) => {
   const [liveContract, setLiveContract] = useState<Contract | null>(initialContract || null);
   const storedDraft = !initialContract ? getStoredDraftData() : null;
 
   // Contract Mode: Business vs Worker Employment
   const [contractType, setContractType] = useState<ContractType>(
+    activeContractType ||
     initialContract?.contractType ||
     storedDraft?.contractType ||
     initialContractType ||
@@ -157,6 +171,44 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   // Left Sidebar Toggle and Active Section Switcher
   const [activeSection, setActiveSection] = useState<SectionKey>('scope');
   const [viewMode, setViewMode] = useState<'single' | 'all'>('single');
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  // Sync external section changes (e.g. from app-level sidebar)
+  useEffect(() => {
+    if (!externalActiveSection) return;
+    if (externalActiveSection === 'proofread') {
+      setIsProofreading(true);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } else {
+      setIsProofreading(false);
+      setActiveSection(externalActiveSection);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (formRef.current) formRef.current.scrollTop = 0;
+    }
+  }, [externalActiveSection]);
+
+  // Notify parent of active section
+  useEffect(() => {
+    onSectionChange?.(activeSection);
+  }, [activeSection, onSectionChange]);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (formRef.current) {
+      formRef.current.scrollTop = 0;
+    }
+  }, []);
+
+  // Scroll to top when switching sections or views in single-mode
+  useEffect(() => {
+    if (viewMode === 'single') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (formRef.current) {
+        formRef.current.scrollTop = 0;
+      }
+    }
+  }, [activeSection, viewMode]);
 
   // Materials / Asset Issuance Table state
   const [hasMaterialsTable, setHasMaterialsTable] = useState<boolean>(
@@ -355,6 +407,9 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   const handleSwitchMode = (newType: ContractType) => {
     if (contractType === newType) return;
     setContractType(newType);
+    if (onContractTypeChange) onContractTypeChange(newType);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (formRef.current) formRef.current.scrollTop = 0;
     
     // Suggest relevant default template when switching modes
     if (newType === 'worker_employment') {
@@ -365,6 +420,13 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       if (defaultBiz) applyOccupation(defaultBiz);
     }
   };
+
+  // Sync external mode changes from sidebar
+  useEffect(() => {
+    if (activeContractType && activeContractType !== contractType) {
+      handleSwitchMode(activeContractType);
+    }
+  }, [activeContractType]);
 
   const handleOccupationSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const occId = e.target.value;
@@ -476,7 +538,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
     }
     setFormError(null);
     setIsProofreading(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   const handleDownloadDraft = async () => {
@@ -575,7 +637,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
           occupationDefinition={currentOccupation}
           onBackToEdit={() => {
             setIsProofreading(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           }}
           onConfirmPublish={() => handleSubmit()}
           onSignInPerson={() => handleSubmit()}
@@ -596,40 +658,23 @@ export const ContractForm: React.FC<ContractFormProps> = ({
     <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
       <div className="bg-white border-2 border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
         
-        {/* Top Mode Switcher Bar */}
-        <div className="p-3 sm:p-4 bg-slate-900 border-b border-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
+        {/* Top Active Contract Mode Bar - Clean display of current contract mode */}
+        <div className="p-3 sm:p-4 bg-slate-900 border-b border-slate-800 text-white flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">
               Contract Mode:
             </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 p-1 bg-slate-800 border border-slate-700 rounded-2xl w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => handleSwitchMode('business')}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                !isEmployment
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Draft for Business</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSwitchMode('worker_employment')}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                isEmployment
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Draft for Workers & Salary</span>
-            </button>
+            {isEmployment ? (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-500/15 text-teal-300 border border-teal-500/30 text-xs font-semibold shadow-2xs">
+                <Users className="w-3.5 h-3.5 text-teal-300" />
+                <span>Workers and Salary</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-300 border border-blue-500/30 text-xs font-semibold shadow-2xs">
+                <Building2 className="w-3.5 h-3.5 text-blue-300" />
+                <span>Business</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -674,7 +719,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
         <div className="px-3 sm:px-5 py-3 border-b border-slate-200 flex items-center justify-between bg-white shrink-0 gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shadow-xs border shrink-0 ${
-              isEmployment ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : 'bg-slate-900 text-blue-400 border-slate-800'
+              isEmployment ? 'bg-teal-950 text-teal-400 border-teal-800' : 'bg-slate-900 text-blue-400 border-slate-800'
             }`}>
               {isEmployment ? <Users className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
             </div>
@@ -684,13 +729,13 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                   {isLocked 
                     ? 'Locked Document' 
                     : isEditing || initialContract 
-                    ? (isEmployment ? 'Edit Worker & Salary Agreement' : 'Edit Business & Commercial Agreement') 
-                    : (isEmployment ? 'Draft Worker & Salary Agreement' : 'Draft Business & Commercial Agreement')}
+                    ? (isEmployment ? 'Worker and Salary Agreement' : 'Business Contract') 
+                    : (isEmployment ? 'Worker and Salary Agreement' : 'Business Contract')}
                 </h2>
                 <span className={`px-2 py-0.5 text-[9px] font-mono rounded-full font-bold uppercase tracking-wider border ${
-                  isEmployment ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-blue-50 text-blue-700 border-blue-300'
+                  isEmployment ? 'bg-teal-50 text-teal-700 border-teal-300' : 'bg-blue-50 text-blue-700 border-blue-300'
                 }`}>
-                  {isEmployment ? 'Worker & Salary' : 'Business & Trade'}
+                  {isEmployment ? 'Workers and Salary' : 'Business'}
                 </span>
               </div>
               <p className="text-[10px] font-sans text-slate-500 hidden sm:block truncate">
@@ -702,50 +747,11 @@ export const ContractForm: React.FC<ContractFormProps> = ({
           </div>
           
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Proofread Button */}
-            <button
-              type="button"
-              onClick={handleOpenProofread}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 text-[11px] sm:text-xs font-sans font-bold uppercase tracking-wider rounded-lg sm:rounded-xl cursor-pointer border border-blue-200 transition-all active:scale-95 shadow-2xs"
-              title="Proofread and review full contract preview"
-            >
-              <FileCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>Proofread</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDownloadDraft}
-              disabled={isGeneratingPdf}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] sm:text-xs font-sans font-bold uppercase tracking-wider rounded-lg sm:rounded-xl cursor-pointer border border-slate-200 transition-all active:scale-95 disabled:opacity-50"
-              title="Download PDF document draft"
-            >
-              <Download className="w-3.5 h-3.5 text-blue-600" />
-              <span className="hidden sm:inline">{isGeneratingPdf ? 'Exporting...' : 'PDF'}</span>
-            </button>
-
-            {!isLocked && (
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => handleSubmit()}
-                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-white text-[11px] sm:text-xs font-sans font-bold uppercase tracking-wider rounded-lg sm:rounded-xl cursor-pointer shadow-xs active:scale-95 whitespace-nowrap transition-all ${
-                  isEmployment ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-                title="Generate and get signing link"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                )}
-                <span>{isSubmitting ? 'Generating...' : 'Generate Link'}</span>
-              </button>
-            )}
             {!isStandalone && onCancel && (
               <button
                 onClick={onCancel}
                 className="p-1 sm:p-1.5 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Close"
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
@@ -753,114 +759,8 @@ export const ContractForm: React.FC<ContractFormProps> = ({
           </div>
         </div>
 
-        {/* Auto-Save Status Strip */}
-        {!initialContract && !isLocked && (
-          <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-5 py-1.5 flex items-center justify-between text-[11px] text-slate-600 shrink-0">
-            <div className="flex items-center gap-1.5 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span>
-                {hasRestoredDraft
-                  ? 'Draft restored • Auto-saved in this tab'
-                  : 'Changes auto-saved in this tab • Safe from accidental page refresh'}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleClearDraft}
-              className="text-slate-500 hover:text-rose-600 font-bold hover:underline cursor-pointer transition-colors ml-2"
-            >
-              Discard & Start Blank
-            </button>
-          </div>
-        )}
-
-        {/* Mobile Step Navigation Tabs */}
-        <div className="md:hidden flex items-center bg-slate-100 border-b border-slate-200 px-2 py-1.5 gap-1 overflow-x-auto no-scrollbar shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveSection('scope')}
-            className={`px-2.5 py-1 text-[11px] font-sans font-bold uppercase whitespace-nowrap rounded-lg transition-all ${
-              activeSection === 'scope' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-700 bg-white border border-slate-200'
-            }`}
-          >
-            1. {isEmployment ? 'Role & Duties' : 'Scope'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('financials')}
-            className={`px-2.5 py-1 text-[11px] font-sans font-bold uppercase whitespace-nowrap rounded-lg transition-all ${
-              activeSection === 'financials' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-700 bg-white border border-slate-200'
-            }`}
-          >
-            2. {isEmployment ? 'Salary & Terms' : 'Costs & Specs'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('photos')}
-            className={`px-2.5 py-1 text-[11px] font-sans font-bold uppercase whitespace-nowrap rounded-lg transition-all ${
-              activeSection === 'photos' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-700 bg-white border border-slate-200'
-            }`}
-          >
-            3. Photos ({images.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('parties')}
-            className={`px-2.5 py-1 text-[11px] font-sans font-bold uppercase whitespace-nowrap rounded-lg transition-all ${
-              activeSection === 'parties' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-700 bg-white border border-slate-200'
-            }`}
-          >
-            4. Signatures
-          </button>
-          <button
-            type="button"
-            onClick={handleOpenProofread}
-            className="px-2.5 py-1 text-[11px] font-sans font-bold uppercase whitespace-nowrap rounded-lg bg-blue-50 text-blue-700 border border-blue-300 transition-all ml-auto flex items-center gap-1 shrink-0 active:scale-95"
-          >
-            <FileCheck className="w-3 h-3" />
-            <span>Proofread</span>
-          </button>
-        </div>
-
-        {/* 2-Column Body: Left Sidebar Toggle Bar + Main Form Content */}
-        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-          
-          {/* Left Side Toggle Bar (Desktop & Tablet) */}
-          <div className="hidden md:flex">
-            <ContractSidebarToggle
-              activeSection={activeSection}
-              onSelectSection={(sec) => {
-                setActiveSection(sec);
-                if (viewMode === 'all') {
-                  const el = document.getElementById(`section-${sec}`);
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-              viewMode={viewMode}
-              onToggleViewMode={() => setViewMode(prev => prev === 'single' ? 'all' : 'single')}
-              contractType={contractType}
-              title={title}
-              selectedOccupationId={selectedOccupationId}
-              totalCost={totalCost}
-              currency={currency}
-              isEmployment={isEmployment}
-              salaryAmount={salaryDetails.baseSalary}
-              salaryFrequency={salaryDetails.paymentFrequency}
-              hasMaterials={hasMaterialsTable}
-              materialsCount={materialsList.length}
-              imagesCount={images.length}
-              isSignedByAdmin={Boolean(adminSignature)}
-              isLocked={isLocked}
-              isSubmitting={isSubmitting}
-              isGeneratingPdf={isGeneratingPdf}
-              onOpenProofread={handleOpenProofread}
-              onDownloadPdfDraft={handleDownloadDraft}
-              onSubmit={() => handleSubmit()}
-            />
-          </div>
-
-          {/* Main Form Scroll Area */}
-          <form onSubmit={handleSubmit} className="p-3 sm:p-6 space-y-5 overflow-y-auto flex-1 bg-slate-50">
+        {/* Main Form Scroll Area */}
+        <form ref={formRef} onSubmit={handleSubmit} className="p-3 sm:p-6 space-y-5 overflow-y-auto flex-1 bg-slate-50">
             
             {/* SECTION 1: Scope & Role Definition */}
             <div 
@@ -989,15 +889,18 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 type="button"
                 onClick={() => {
                   setActiveSection('financials');
-                  const formContainer = document.getElementById('section-financials');
-                  if (formContainer && viewMode === 'all') {
-                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  if (viewMode === 'all') {
+                    const formContainer = document.getElementById('section-financials');
+                    if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
                   }
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-sans font-bold uppercase tracking-wider rounded-xl shadow-sm cursor-pointer transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-medium rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95"
               >
                 <span>Next: {isEmployment ? 'Salary & Package' : 'Cost & Spec'}</span>
-                <span>→</span>
+                <span className="text-[11px]">→</span>
               </button>
             </div>
 
@@ -1411,29 +1314,35 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 type="button"
                 onClick={() => {
                   setActiveSection('scope');
-                  const formContainer = document.getElementById('section-scope');
-                  if (formContainer && viewMode === 'all') {
-                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  if (viewMode === 'all') {
+                    const formContainer = document.getElementById('section-scope');
+                    if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
                   }
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-sans font-bold uppercase rounded-xl cursor-pointer transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 cursor-pointer transition-colors active:scale-95"
               >
-                <span>←</span>
+                <span className="text-[11px]">←</span>
                 <span>Back to Scope</span>
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setActiveSection('photos');
-                  const formContainer = document.getElementById('section-photos');
-                  if (formContainer && viewMode === 'all') {
-                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  if (viewMode === 'all') {
+                    const formContainer = document.getElementById('section-photos');
+                    if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
                   }
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-sans font-bold uppercase tracking-wider rounded-xl shadow-sm cursor-pointer transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-medium rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95"
               >
                 <span>Next: Attach Photos</span>
-                <span>→</span>
+                <span className="text-[11px]">→</span>
               </button>
             </div>
 
@@ -1485,29 +1394,35 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 type="button"
                 onClick={() => {
                   setActiveSection('financials');
-                  const formContainer = document.getElementById('section-financials');
-                  if (formContainer && viewMode === 'all') {
-                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  if (viewMode === 'all') {
+                    const formContainer = document.getElementById('section-financials');
+                    if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
                   }
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-sans font-bold uppercase rounded-xl cursor-pointer transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 cursor-pointer transition-colors active:scale-95"
               >
-                <span>←</span>
+                <span className="text-[11px]">←</span>
                 <span>Back to {isEmployment ? 'Salary' : 'Cost & Spec'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setActiveSection('parties');
-                  const formContainer = document.getElementById('section-parties');
-                  if (formContainer && viewMode === 'all') {
-                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  if (viewMode === 'all') {
+                    const formContainer = document.getElementById('section-parties');
+                    if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
                   }
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-sans font-bold uppercase tracking-wider rounded-xl shadow-sm cursor-pointer transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-medium rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95"
               >
                 <span>Next: Signatures</span>
-                <span>→</span>
+                <span className="text-[11px]">→</span>
               </button>
             </div>
 
@@ -1697,86 +1612,58 @@ export const ContractForm: React.FC<ContractFormProps> = ({
 
             </div>
 
-            {/* Mobile Submit Actions */}
-            <div className="md:hidden pt-2 flex items-center justify-between gap-2">
+            {/* Section 4 Back Button */}
+            <div className="pt-2 flex justify-start">
               <button
                 type="button"
-                onClick={() => setActiveSection('photos')}
-                className="px-3 py-2 bg-slate-200 text-slate-800 text-xs font-sans font-bold uppercase rounded-xl"
+                onClick={() => {
+                  setActiveSection('photos');
+                  if (viewMode === 'all') {
+                    const formContainer = document.getElementById('section-photos');
+                    if (formContainer) formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
+                  }
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 cursor-pointer transition-colors active:scale-95"
               >
-                ← Back
+                <span className="text-[11px]">←</span>
+                <span>Back to Photos</span>
               </button>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleOpenProofread}
-                  className="px-3 py-2 bg-blue-50 border border-blue-300 text-blue-800 text-xs font-sans font-bold uppercase rounded-xl flex items-center gap-1 active:scale-98"
-                >
-                  <FileCheck className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Proofread</span>
-                </button>
-
-                {isLocked ? (
-                  onCancel && (
-                    <button
-                      type="button"
-                      onClick={onCancel}
-                      className="px-4 py-2 bg-slate-800 text-white text-xs font-sans font-bold uppercase tracking-wider rounded-xl cursor-pointer"
-                    >
-                      Close
-                    </button>
-                  )
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 text-white text-xs font-sans font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-md active:scale-98 cursor-pointer transition-all ${
-                      isEmployment ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 text-white" />
-                    )}
-                    <span>{isSubmitting ? '...' : 'Generate'}</span>
-                  </button>
-                )}
-              </div>
             </div>
 
           </div>
 
           {/* Desktop Form Bottom Sticky Action Bar */}
-          <div className="hidden md:flex items-center justify-between bg-white border-t border-slate-200 pt-4 mt-6">
+          <div className="hidden md:flex items-center justify-between bg-white border-t border-slate-200 pt-3.5 mt-5">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleOpenProofread}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/90 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-2xs"
               >
-                <FileCheck className="w-4 h-4 text-blue-600" />
-                <span>Proofread Agreement Preview</span>
+                <FileCheck className="w-3.5 h-3.5 text-teal-600" />
+                <span>Proofread Agreement</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleDownloadDraft}
                 disabled={isGeneratingPdf}
-                className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer active:scale-95 disabled:opacity-50 shadow-2xs"
               >
-                <Download className="w-4 h-4 text-slate-600" />
-                <span>{isGeneratingPdf ? 'Exporting PDF...' : 'Download PDF Draft'}</span>
+                <Download className="w-3.5 h-3.5 text-slate-600" />
+                <span>{isGeneratingPdf ? 'Exporting...' : 'PDF Preview'}</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {onCancel && (
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 cursor-pointer"
+                  className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-800 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1786,26 +1673,83 @@ export const ContractForm: React.FC<ContractFormProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`flex items-center gap-2 px-6 py-3 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg transition-all cursor-pointer active:scale-95 ${
-                    isEmployment 
-                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25' 
-                      : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/25'
-                  }`}
+                  className="flex items-center gap-1.5 px-4 py-2.5 text-white text-xs font-semibold uppercase tracking-wider rounded-lg shadow-xs transition-all cursor-pointer active:scale-95 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700"
                 >
                   {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4 text-white" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                   )}
-                  <span>{isSubmitting ? 'Generating Agreement...' : (isEmployment ? 'Generate Worker Signing Link' : 'Generate Signing Link')}</span>
+                  <span>{isSubmitting ? 'Generating...' : (isEmployment ? 'Generate Worker Signing Link' : 'Generate Signing Link')}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Native Bottom Navigation Bar */}
+          <div className="md:hidden sticky bottom-0 z-30 -mx-3 -mb-3 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2 flex items-center justify-between gap-1.5 shadow-xs">
+            {activeSection !== 'scope' ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (activeSection === 'parties') setActiveSection('photos');
+                  else if (activeSection === 'photos') setActiveSection('financials');
+                  else if (activeSection === 'financials') setActiveSection('scope');
+                  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                  if (formRef.current) formRef.current.scrollTop = 0;
+                }}
+                className="h-9 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold uppercase rounded-lg flex items-center gap-1 transition-colors active:scale-95 cursor-pointer shrink-0"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
+              <button
+                type="button"
+                onClick={handleOpenProofread}
+                className="h-9 px-2.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 text-xs font-semibold rounded-lg flex items-center gap-1 active:scale-95 cursor-pointer transition-colors shrink-0 shadow-2xs"
+              >
+                <FileCheck className="w-3.5 h-3.5 text-teal-600" />
+                <span className="text-[11px]">Proofread</span>
+              </button>
+
+              {activeSection === 'parties' ? (
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="h-9 px-3 text-white text-xs font-semibold uppercase tracking-wider rounded-lg flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer shrink-0 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  )}
+                  <span>{isSubmitting ? '...' : 'Sign & Link'}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeSection === 'scope') setActiveSection('financials');
+                    else if (activeSection === 'financials') setActiveSection('photos');
+                    else if (activeSection === 'photos') setActiveSection('parties');
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    if (formRef.current) formRef.current.scrollTop = 0;
+                  }}
+                  className="h-9 px-3 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-semibold uppercase tracking-wider rounded-lg flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer shrink-0"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
           </div>
 
         </form>
-
-        </div>
 
       </div>
     </div>

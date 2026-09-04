@@ -7,6 +7,12 @@ import { BlankStarterPage } from './components/BlankStarterPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { detectDefaultLanguage, SUPPORTED_LANGUAGES } from './utils/i18n';
 import { CURRENCY_LIST } from './utils/formatters';
+import { AppSidebar, ContractSectionId } from './components/AppSidebar';
+import { AppLogo } from './components/AppLogo';
+import { AuthModal } from './components/AuthModal';
+import { OccupationSelectModal, UserBusinessProfile } from './components/OccupationSelectModal';
+import { OccupationDefinition } from './data/occupations';
+import { watchAuthState, signOutUser } from './lib/firebase';
 import { 
   createContractInFirebase, 
   getContractByIdOrToken,
@@ -18,10 +24,20 @@ import {
   updateContractInFirebase,
   getOrCreateBrowserUser
 } from './lib/firebaseService';
-import { Loader2, Plus, ArrowLeft, Globe, DollarSign, FileText, CheckCircle2, LayoutDashboard } from 'lucide-react';
+import { Loader2, Plus, ArrowLeft, Globe, DollarSign, FileText, CheckCircle2, LayoutDashboard, Menu } from 'lucide-react';
 
 export default function App() {
-  const [currentUser] = useState<AuthUser>(() => getOrCreateBrowserUser());
+  const [currentUser, setCurrentUser] = useState<AuthUser>(() => getOrCreateBrowserUser());
+  const [isFirebaseLoggedIn, setIsFirebaseLoggedIn] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showOccupationModal, setShowOccupationModal] = useState(false);
+  const [userOccupation, setUserOccupation] = useState<OccupationDefinition | null>(null);
+  const [userBusinessProfile, setUserBusinessProfile] = useState<UserBusinessProfile | null>(null);
+  const [currentSection, setCurrentSection] = useState<ContractSectionId | null>('scope');
+  const [requestedSection, setRequestedSection] = useState<ContractSectionId | null>(null);
+  const [activeContractType, setActiveContractType] = useState<ContractType>('business');
+
   const [loading, setLoading] = useState(true);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [activeClientContract, setActiveClientContract] = useState<Contract | null>(null);
@@ -39,6 +55,27 @@ export default function App() {
   // Global Currency & Language Preferences
   const [selectedCurrency, setSelectedCurrency] = useState<string>('NGN');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+
+  // Listen to Firebase Auth state
+  useEffect(() => {
+    const unsubscribe = watchAuthState((user) => {
+      if (user) {
+        setIsFirebaseLoggedIn(true);
+        const authUser: AuthUser = {
+          uid: user.uid,
+          displayName: user.displayName || user.email?.split('@')[0] || 'User',
+          email: user.email,
+        };
+        setCurrentUser(authUser);
+        try {
+          localStorage.setItem('contract_app_current_user', JSON.stringify(authUser));
+        } catch {}
+      } else {
+        setIsFirebaseLoggedIn(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Auto detect initial language
   useEffect(() => {
@@ -62,6 +99,11 @@ export default function App() {
     });
     return () => unsubscribe();
   }, [justCreatedContract?.id]);
+
+  // Scroll to top immediately whenever any top-level view/screen is switched
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [showDashboard, isDrafting, justCreatedContract?.id, activeClientContract?.id]);
 
   // Check URL params for client signing route, OR restore active in-progress contract/draft on page refresh
   useEffect(() => {
@@ -123,7 +165,7 @@ export default function App() {
       } catch {}
       setShowDashboard(false);
       setIsDrafting(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     } catch (err: any) {
       console.error('Failed to create contract:', err);
       alert(err?.message || 'Failed to create contract. Please check your internet connection.');
@@ -182,7 +224,7 @@ export default function App() {
     setShowDashboard(false);
     setIsDrafting(false);
     window.history.pushState({}, '', window.location.pathname);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   const completedContractsCount = contracts.filter(c => c.status === 'completed').length;
@@ -220,127 +262,154 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       
-      {/* Top Header Bar */}
+      {/* Top Header Bar - Minimalist with sidebar toggle and app name */}
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-13 sm:h-15 flex items-center justify-between gap-2 sm:gap-3">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-13 sm:h-15 flex items-center justify-between">
           
-          {/* Logo & Identity */}
-          <div 
-            onClick={handleDraftNew}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity shrink-0"
-          >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md shadow-blue-500/30 shrink-0">
-              C
-            </div>
-            <div>
-              <span className="font-extrabold tracking-tight text-base sm:text-lg text-white">
-                CONTRACT<span className="font-light italic text-blue-400">S</span>
-              </span>
-              <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 text-[9px] font-mono rounded-full bg-blue-500/15 text-blue-300 border border-blue-400/30 font-bold uppercase tracking-wider">
-                E-Sign
-              </span>
-            </div>
-          </div>
-
-          {/* Center / Navigation items */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Left: Sidebar Toggle Button + Name of the App */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <button
+              onClick={() => setIsSidebarOpen(prev => !prev)}
+              className="p-1.5 sm:p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500/30"
+              aria-label="Toggle navigation sidebar"
+              title="Navigation Menu"
+            >
+              <Menu className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-slate-200" />
+            </button>
+
+            {/* Name of the App with Diagonal Blue-Sea Green Rectangle Logo */}
+            <AppLogo 
+              size="md"
               onClick={() => {
                 setShowDashboard(false);
                 setIsDrafting(false);
                 setJustCreatedContract(null);
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                !showDashboard && !isDrafting && !justCreatedContract
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              Draft Contract
-            </button>
-
-            {contracts.length > 0 && (
-              <button
-                onClick={() => {
-                  setShowDashboard(true);
-                  setIsDrafting(false);
-                  setJustCreatedContract(null);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  showDashboard
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 text-blue-400" />
-                <span>Drafted Contracts ({contracts.length})</span>
-                {completedContractsCount > 0 && (
-                  <span className="px-1.5 py-0.2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold rounded-full">
-                    {completedContractsCount} signed
-                  </span>
-                )}
-              </button>
-            )}
+            />
           </div>
 
-          {/* Quick Header Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Currency Selector */}
-            <div className="flex items-center gap-1 bg-slate-800/90 border border-slate-700/80 rounded-lg sm:rounded-xl px-1.5 sm:px-2 py-1">
-              <DollarSign className="w-3 h-3 text-slate-400 shrink-0" />
-              <select
-                value={selectedCurrency}
-                onChange={(e) => setSelectedCurrency(e.target.value)}
-                className="bg-transparent text-[11px] sm:text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer pr-0.5"
-              >
-                {CURRENCY_LIST.map((c) => (
-                  <option key={c.code} value={c.code} className="bg-slate-900 text-white">
-                    {c.symbol} {c.code}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Language Selector */}
-            <div className="hidden md:flex items-center gap-1 bg-slate-800/90 border border-slate-700/80 rounded-lg sm:rounded-xl px-2 py-1">
-              <Globe className="w-3 h-3 text-slate-400 shrink-0" />
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer pr-1"
-              >
-                {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code} className="bg-slate-900 text-white">
-                    {l.flag} {l.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Back to Start or New Draft Button */}
-            {isDrafting && !justCreatedContract && (
+          {/* Right side: Clean! No draft contracts, no currency tab per user request */}
+          <div className="flex items-center gap-2">
+            {isFirebaseLoggedIn && currentUser ? (
               <button
-                onClick={() => setIsDrafting(false)}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
+                onClick={() => setIsSidebarOpen(true)}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-blue-600 to-teal-600 text-white font-semibold text-xs flex items-center justify-center cursor-pointer hover:opacity-90 transition-all shadow-2xs"
+                title={currentUser.displayName || currentUser.email || 'User Account'}
               >
-                <ArrowLeft className="w-3 h-3" />
-                <span className="hidden xs:inline sm:inline">Back</span>
+                {currentUser.displayName ? currentUser.displayName.charAt(0) : currentUser.email ? currentUser.email.charAt(0) : 'U'}
               </button>
-            )}
-
-            {justCreatedContract && (
-              <button
-                onClick={handleDraftNew}
-                className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider rounded-lg sm:rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
-              >
-                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="hidden xs:inline sm:inline">Draft Another</span>
-                <span className="xs:hidden sm:hidden">New</span>
-              </button>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
+
+      {/* Navigation Toggle Sidebar */}
+      <AppSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        activeView={showDashboard ? 'dashboard' : justCreatedContract ? 'ready' : isDrafting ? 'draft' : 'starter'}
+        contractMode={activeContractType}
+        onContractModeChange={(mode) => {
+          setActiveContractType(mode);
+          setDraftOptions(prev => ({ ...prev, contractType: mode }));
+          if (!isDrafting || showDashboard || justCreatedContract) {
+            setShowDashboard(false);
+            setJustCreatedContract(null);
+            setIsDrafting(true);
+            setCurrentSection('scope');
+            setRequestedSection('scope');
+          }
+        }}
+        activeSection={currentSection}
+        onSelectSection={(sec) => {
+          setIsSidebarOpen(false);
+          if (!isDrafting || showDashboard || justCreatedContract) {
+            setShowDashboard(false);
+            setJustCreatedContract(null);
+            setIsDrafting(true);
+          }
+          setCurrentSection(sec);
+          setRequestedSection(sec);
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }}
+        onNavigateToDraft={() => {
+          setIsSidebarOpen(false);
+          setShowDashboard(false);
+          setJustCreatedContract(null);
+          setIsDrafting(true);
+          setCurrentSection('scope');
+          setRequestedSection('scope');
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }}
+        onNavigateToDashboard={() => {
+          setIsSidebarOpen(false);
+          setIsDrafting(false);
+          setJustCreatedContract(null);
+          setShowDashboard(true);
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }}
+        contractsCount={contracts.length}
+        completedContractsCount={completedContractsCount}
+        currentUser={currentUser}
+        isFirebaseLoggedIn={isFirebaseLoggedIn}
+        onOpenAuthModal={() => {
+          setIsSidebarOpen(false);
+          setShowAuthModal(true);
+        }}
+        onSignOut={async () => {
+          try {
+            await signOutUser();
+          } catch (err) {
+            console.warn('Sign out notice:', err);
+          }
+          const browserUser = getOrCreateBrowserUser();
+          setCurrentUser(browserUser);
+          setIsFirebaseLoggedIn(false);
+        }}
+        selectedCurrency={selectedCurrency}
+        onCurrencyChange={setSelectedCurrency}
+        selectedLanguage={selectedLanguage}
+        onLanguageChange={setSelectedLanguage}
+        onOpenOccupationModal={() => {
+          setIsSidebarOpen(false);
+          setShowOccupationModal(true);
+        }}
+        userOccupation={userOccupation}
+        userBusinessProfile={userBusinessProfile}
+      />
+
+      {/* Login & Registration Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={(user) => {
+          setCurrentUser(user);
+          setIsFirebaseLoggedIn(true);
+          setShowAuthModal(false);
+        }}
+      />
+
+      {/* Trade / Occupation Selection Modal */}
+      <OccupationSelectModal
+        isOpen={showOccupationModal}
+        onClose={() => setShowOccupationModal(false)}
+        currentUser={currentUser}
+        initialOccupation={userOccupation}
+        initialBusinessProfile={userBusinessProfile}
+        onSelectOccupation={(occ, profile) => {
+          setUserOccupation(occ);
+          if (profile) setUserBusinessProfile(profile);
+          setShowOccupationModal(false);
+          if (occ) {
+            setDraftOptions({ contractType: occ.contractType, occupationId: occ.id });
+            setShowDashboard(false);
+            setIsDrafting(true);
+            setJustCreatedContract(null);
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          }
+        }}
+      />
 
       {/* Main Page Area */}
       <main className="flex-1 w-full pb-16">
@@ -354,13 +423,19 @@ export default function App() {
               onCompleteContract={handleCompleteContract}
               onInvalidateLink={handleInvalidateLink}
               onDeleteContract={handleDeleteContract}
-              onOpenClientPortal={(c) => setActiveClientContract(c)}
+              onOpenClientPortal={(c) => {
+                setActiveClientContract(c);
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+              }}
             />
           </div>
         ) : justCreatedContract ? (
           <ContractReadyView
             contract={justCreatedContract}
-            onOpenSigningPortal={(c) => setActiveClientContract(c)}
+            onOpenSigningPortal={(c) => {
+              setActiveClientContract(c);
+              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }}
             onDraftNewContract={handleDraftNew}
           />
         ) : isDrafting ? (
@@ -369,18 +444,32 @@ export default function App() {
               isStandalone={true}
               defaultCurrency={selectedCurrency}
               defaultLanguage={selectedLanguage}
-              initialContractType={draftOptions?.contractType}
+              initialContractType={draftOptions?.contractType || activeContractType}
+              activeContractType={activeContractType}
+              onContractTypeChange={(type) => setActiveContractType(type)}
               initialOccupationId={draftOptions?.occupationId}
+              defaultOccupation={userOccupation}
+              defaultBusinessProfile={userBusinessProfile}
+              externalActiveSection={requestedSection}
+              onSectionChange={(sec) => setCurrentSection(sec)}
+              onOpenSidebar={() => setIsSidebarOpen(true)}
               onSave={handleCreateContract}
-              onCancel={() => setIsDrafting(false)}
+              onCancel={() => {
+                setIsDrafting(false);
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+              }}
             />
           </div>
         ) : (
           <BlankStarterPage 
             onStartDrafting={(opts) => {
+              if (opts?.contractType) {
+                setActiveContractType(opts.contractType);
+              }
               setDraftOptions(opts || null);
               setShowDashboard(false);
               setIsDrafting(true);
+              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             }} 
           />
         )}

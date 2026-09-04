@@ -6,11 +6,11 @@
   }
 
   * {
-    font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Roboto', 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   body {
-    font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Roboto', 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 1rem;
     line-height: 1.5;
     background-color: #f8fafc;
@@ -22,21 +22,21 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Roboto', 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: -0.02em;
     font-weight: 700;
   }
 
   input, button, select, textarea, label {
-    font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Roboto', 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   .font-sans {
-    font-family: 'Tahoma', 'Segoe UI', Geneva, Verdana, sans-serif !important;
+    font-family: 'Inter', 'Roboto', 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   }
 
   .font-serif {
-    font-family: 'Tahoma', 'Segoe UI', Geneva, Georgia, serif !important;
+    font-family: 'Inter', 'Roboto', 'Open Sans', Georgia, serif !important;
   }
 
   .font-mono {

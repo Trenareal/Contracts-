@@ -31,6 +31,7 @@ export const ContractReadyView: React.FC<ContractReadyViewProps> = ({
 
   // Subscribe to real-time contract updates (cloud firestore + instant cross-tab sync)
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     setContract(initialContract);
     const unsubscribe = subscribeToSingleContract(initialContract.id, (fresh) => {
       setContract(fresh);

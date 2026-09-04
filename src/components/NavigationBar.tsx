@@ -21,6 +21,7 @@ import { CURRENCY_LIST } from '../utils/formatters';
 import { SUPPORTED_LANGUAGES } from '../utils/i18n';
 import { OccupationDefinition } from '../data/occupations';
 import { UserBusinessProfile } from './OccupationSelectModal';
+import { AppLogo } from './AppLogo';
 
 interface NavigationBarProps {
   activeTab: 'contracts' | 'occupations' | 'currency' | 'language';
@@ -74,12 +75,12 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
               <button
                 type="button"
                 onClick={onToggleSidebar}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white hover:text-blue-300 border border-white/15 transition-all cursor-pointer active:scale-95 shadow-xs"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white hover:text-teal-300 border border-white/10 transition-all cursor-pointer active:scale-95 shadow-2xs"
                 title={isSidebarOpen ? "Close sidebar" : "Open sidebar menu"}
                 aria-label="Toggle navigation sidebar"
               >
-                <PanelLeft className="w-4 h-4 text-blue-400" />
-                <span className="hidden sm:inline text-xs font-sans font-bold uppercase tracking-wider text-slate-200">
+                <PanelLeft className="w-4 h-4 text-teal-400" />
+                <span className="hidden sm:inline text-xs font-sans font-semibold uppercase tracking-wider text-slate-200">
                   Menu
                 </span>
               </button>
@@ -87,44 +88,41 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
               {/* Brand Logo & Name */}
               <button
                 onClick={() => setActiveTab('contracts')}
-                className="flex items-center gap-2 font-sans font-bold text-base sm:text-lg tracking-tight text-white hover:text-blue-200 transition-colors cursor-pointer group"
+                className="flex items-center cursor-pointer group"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center font-serif font-black text-xs sm:text-sm shadow-md shadow-blue-900/40 group-hover:scale-105 transition-transform border border-blue-400/30">
-                  C
-                </div>
-                <span className="font-extrabold tracking-tight">CONTRACT<span className="font-light italic text-blue-400">S</span></span>
+                <AppLogo size="sm" />
               </button>
 
               {/* Active Trade Pill (Quick shortcut) */}
               {userOccupation && (
                 <button
                   onClick={onOpenOccupationModal}
-                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 bg-blue-950/80 hover:bg-blue-900/80 border border-blue-700/50 text-blue-200 text-xs font-sans font-bold rounded-full transition-all cursor-pointer max-w-[200px]"
+                  className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 hover:bg-slate-750 border border-slate-700/60 text-teal-200 text-xs font-sans font-medium rounded-lg transition-all cursor-pointer max-w-[200px]"
                   title="Your active trade. Click to switch."
                 >
-                  <Briefcase className="w-3 h-3 shrink-0 text-blue-400" />
+                  <Briefcase className="w-3 h-3 shrink-0 text-teal-400" />
                   <span className="truncate">{userOccupation.title}</span>
                 </button>
               )}
             </div>
 
             {/* Right: Quick Action & Profile Badge */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               
               {/* Currency Chip */}
               <button
                 onClick={() => onToggleSidebar()}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700/60 text-xs font-mono font-medium text-slate-200 cursor-pointer transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-750 border border-slate-700/60 text-xs font-mono font-medium text-slate-200 cursor-pointer transition-colors"
                 title="Change currency in sidebar"
               >
                 <span>{currentCurrObj.flag}</span>
-                <span className="font-bold text-blue-400">{currentCurrObj.code}</span>
+                <span className="font-semibold text-teal-400">{currentCurrObj.code}</span>
               </button>
 
               {/* Primary "+ New Contract" Button */}
               <button
                 onClick={onOpenCreateModal}
-                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-sans font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-blue-600/30 active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-sans font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span className="hidden xs:inline sm:inline">New Contract</span>
@@ -134,10 +132,10 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
               {/* User Avatar Button (opens sidebar) */}
               <button
                 onClick={onToggleSidebar}
-                className="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 px-2 sm:px-3 py-1 sm:py-1.5 text-xs transition-all cursor-pointer rounded-xl"
+                className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-2 py-1 text-xs transition-all cursor-pointer rounded-lg"
                 title="Open sidebar and profile settings"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-600 to-teal-600 text-white flex items-center justify-center font-semibold text-[10px] uppercase shadow-2xs">
                   {currentUser?.displayName ? currentUser.displayName.charAt(0) : 'W'}
                 </div>
                 <span className="hidden sm:inline font-sans font-medium text-slate-200 truncate max-w-[110px]">

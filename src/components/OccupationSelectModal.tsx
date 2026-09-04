@@ -470,19 +470,19 @@ export const OccupationSelectModal: React.FC<OccupationSelectModalProps> = ({
               <button
                 type="button"
                 onClick={() => setStep('trade')}
-                className="flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl cursor-pointer"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg cursor-pointer"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Industry Selection</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleCompleteSetup}
-                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-sans font-bold uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-blue-600/25 rounded-xl active:scale-98"
+                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-xs rounded-lg active:scale-98"
               >
-                <Check className="w-4 h-4" />
-                <span>Save Business Profile & Continue</span>
+                <Check className="w-3.5 h-3.5" />
+                <span>Save Profile & Continue</span>
               </button>
             </>
           )}

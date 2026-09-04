@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Contract, CreateContractPayload } from '../types';
 import { ContractForm } from './ContractForm';
 import { InPersonSigningModal } from './InPersonSigningModal';
@@ -52,6 +52,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [mobileActionContract, setMobileActionContract] = useState<Contract | null>(null);
   const [inPersonSigningContract, setInPersonSigningContract] = useState<Contract | null>(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   // Metrics
   const totalValue = contracts.reduce((acc, c) => acc + c.totalCost, 0);
@@ -126,7 +130,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         <div className="flex items-center gap-3 relative z-10 shrink-0">
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setShowCreateModal(true);
+              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-sans font-bold uppercase tracking-wider shadow-lg shadow-blue-600/25 active:scale-98 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4 text-white stroke-[2.5]" />

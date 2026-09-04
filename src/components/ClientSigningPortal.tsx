@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Contract, SignContractPayload } from '../types';
 import { SignaturePad } from './SignaturePad';
 import { MaterialsTable } from './MaterialsTable';
@@ -44,6 +44,10 @@ export const ClientSigningPortal: React.FC<ClientSigningPortalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(contract.status === 'completed' || contract.linkInvalidated);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   // Submit Signature & Execute Contract
   const handleSignContract = async (e: React.FormEvent) => {

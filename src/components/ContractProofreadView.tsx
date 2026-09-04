@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ContractMaterialItem, ContractImage, PartyDetails, ContractType, SalaryDetails } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import { getI18nText } from '../utils/i18n';
@@ -57,6 +57,10 @@ export const ContractProofreadView: React.FC<ContractProofreadViewProps> = ({
   const isEmployment = data.contractType === 'worker_employment';
   const salary = data.salaryDetails;
   const balanceDue = Math.max(0, data.totalCost - data.depositAmount);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto py-2 sm:py-4 px-2 sm:px-4 animate-in fade-in duration-300 space-y-4">
@@ -125,12 +129,12 @@ export const ContractProofreadView: React.FC<ContractProofreadViewProps> = ({
             type="button"
             onClick={onConfirmPublish}
             disabled={isSubmitting}
-            className="flex items-center justify-center gap-2 px-5 py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider rounded-2xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer active:scale-98"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 disabled:opacity-60 text-white text-xs font-semibold uppercase tracking-wider rounded-xl shadow-xs transition-all cursor-pointer active:scale-98"
           >
             {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin text-white" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
             ) : (
-              <ArrowRight className="w-4 h-4 text-white" />
+              <ArrowRight className="w-3.5 h-3.5 text-white" />
             )}
             <span>{isSubmitting ? 'Publishing...' : (isEmployment ? 'Publish & Get Worker Signing Link' : 'Publish & Get Remote Signing Link')}</span>
           </button>
@@ -141,10 +145,10 @@ export const ContractProofreadView: React.FC<ContractProofreadViewProps> = ({
               type="button"
               onClick={onSignInPerson}
               disabled={isSubmitting}
-              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-600/30 transition-all cursor-pointer active:scale-98"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-teal-300 border border-slate-700 text-xs font-semibold uppercase tracking-wider rounded-xl shadow-2xs transition-all cursor-pointer active:scale-98"
             >
-              <UserCheck className="w-4 h-4 text-white" />
-              <span>{isEmployment ? 'Worker is Present: Sign in Person Now' : 'Client is Present: Sign in Person Now'}</span>
+              <UserCheck className="w-3.5 h-3.5 text-teal-400" />
+              <span>{isEmployment ? 'Worker is Present: Sign in Person' : 'Client is Present: Sign in Person'}</span>
             </button>
           )}
 
@@ -437,7 +441,7 @@ export const ContractProofreadView: React.FC<ContractProofreadViewProps> = ({
           <button
             type="button"
             onClick={onBackToEdit}
-            className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold uppercase rounded-xl border border-slate-700 cursor-pointer"
+            className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold uppercase rounded-lg border border-slate-700 cursor-pointer transition-colors"
           >
             Edit
           </button>
@@ -447,9 +451,9 @@ export const ContractProofreadView: React.FC<ContractProofreadViewProps> = ({
               type="button"
               onClick={onSignInPerson}
               disabled={isSubmitting}
-              className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase rounded-xl shadow-xs cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+              className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-xs font-semibold uppercase rounded-lg shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 transition-all"
             >
-              <UserCheck className="w-3.5 h-3.5" />
+              <UserCheck className="w-3.5 h-3.5 text-teal-400" />
               <span>Sign In Person</span>
             </button>
           )}
@@ -458,7 +462,7 @@ export const ContractProofreadView: React.FC<ContractProofreadViewProps> = ({
             type="button"
             onClick={onConfirmPublish}
             disabled={isSubmitting}
-            className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase rounded-xl shadow-xs cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+            className="flex-1 sm:flex-none px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-xs font-semibold uppercase rounded-lg shadow-xs cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 transition-all"
           >
             <ArrowRight className="w-3.5 h-3.5" />
             <span>Publish Link</span>
